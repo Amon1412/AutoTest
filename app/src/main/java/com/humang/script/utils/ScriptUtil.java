@@ -4,11 +4,17 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.humang.script.MessageType;
 import com.humang.script.expression_parsing.ExpressionParse;
 import com.humang.script.expression_parsing.ExpressionTrans;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,14 +29,16 @@ public class ScriptUtil {
     private boolean isStop;
     private Thread thread;
     private Context context;
+    private Handler handler;
 
     private ScriptUtil(){}
     private static ScriptUtil scriptUtil;
-    public static ScriptUtil getInstance(Context context){
+    public static ScriptUtil getInstance(Context context,Handler handler){
         if (scriptUtil == null){
             scriptUtil = new ScriptUtil();
         }
         scriptUtil.context = context;
+        scriptUtil.handler = handler;
         return scriptUtil;
     }
 
@@ -46,9 +54,14 @@ public class ScriptUtil {
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                Log.e("humang_script", "startScript");
+                isStop = false;
+//                Log.e("humang_script", "startScript");
+//                saveLog();
                 excuteCmds(purity(batCmds));
-                Log.e("humang_script", "stopScript");
+                Message message = handler.obtainMessage();
+                message.what = MessageType.EXCUTE_COMPLETE;
+                handler.sendMessage(message);
+//                Log.e("humang_script", "stopScript");
                 isStop = false;
             }
         });
@@ -65,6 +78,19 @@ public class ScriptUtil {
             thread = null;
             Log.e("humang_script", "closeThread");
         }
+    }
+
+    public void saveLog() {
+        Date date = new Date();
+        String time = timeStamp2Date(date.getTime());
+        excuteAdbCmd("logcat > /sdcard/Download/log_"+time+".txt &");
+        Log.d("humang_script", "saveLog");
+    }
+
+    public static String timeStamp2Date(long time) {
+        String format = "yyyy-MM-dd_HH-mm-ss";
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        return sdf.format(new Date(time));
     }
 
     /*
@@ -107,6 +133,7 @@ public class ScriptUtil {
     * 单行命令处理
     * */
     public void excuteCmd(String cmd) {
+//        Toast.makeText(context,cmd,Toast.LENGTH_SHORT).show();
         if (isVariableDefine(cmd)) {
             defineVariable(cmd);
         } else {
@@ -116,9 +143,7 @@ public class ScriptUtil {
             excuteEcho(cmd);
         } else if (isSleep(cmd)) {
             excuteSleep(cmd);
-        } else if(isStartActivity(cmd)){
-           excuteStartActivity(cmd);
-        } else if (
+        }else if (
                 isVariableDefine(cmd)
                 || isLoopStart(cmd)
                 || isLoopEnd(cmd)){
@@ -137,7 +162,6 @@ public class ScriptUtil {
     public List<String> purity(List<String> batCmds) {
         ArrayList<String> newBatCmds = new ArrayList<>();
         for (String batCmd : batCmds) {
-            batCmd = batCmd.replace("adb shell ","");
             batCmd = batCmd.replace("\n","");
             batCmd = batCmd.replace("\t","");
             if (batCmd.contains("chcp")) {
@@ -151,7 +175,7 @@ public class ScriptUtil {
             }
             newBatCmds.add(batCmd);
         }
-        Log.d("humang_script", "newBatCmds:"+newBatCmds);
+//        Log.d("humang_script", "newBatCmds:"+newBatCmds);
         return newBatCmds;
     }
 
@@ -171,6 +195,7 @@ public class ScriptUtil {
 //            Log.d("humang_script", "realValue = " + realValue);
         }
         realValue = calculateVariable(realValue);
+//        Log.d("humang_script", "defineVariable:"+ key +" = "+realValue);
         vars.put(key,realValue);
     }
 
@@ -300,6 +325,11 @@ public class ScriptUtil {
      * 将bat命令中的adb shell命令转为java方式
      * */
     public void excuteAdbCmd(String cmd) {
+        cmd = cmd.replace("adb shell ","");
+        if(isStartActivity(cmd)){
+            excuteStartActivity(cmd);
+            return;
+        }
         String[] subCmds = cmd.trim().split(" ");
         String result = ShellUtil.getInstance().execute(subCmds);
         Log.e("humang_script", "excuteAdbCmd: "+cmd+"  result: "+result);

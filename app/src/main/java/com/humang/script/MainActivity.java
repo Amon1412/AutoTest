@@ -1,11 +1,13 @@
 package com.humang.script;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings;
+import android.util.Log;
 import android.widget.Button;
 import android.view.WindowManager;
 import android.graphics.PixelFormat;
@@ -15,22 +17,54 @@ import android.content.Context;
 import android.view.View;
 import android.view.MotionEvent;
 import android.view.View.OnClickListener;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
-import androidx.core.app.ActivityCompat;
+import androidx.annotation.NonNull;
 
 import com.humang.script.utils.FileUtil;
 import com.humang.script.utils.ScriptUtil;
-import com.humang.script.utils.ShellUtil;
 
+import java.io.IOException;
 import java.util.List;
 
 public class MainActivity extends Activity {
     private WindowManager windowManager;
     private WindowManager.LayoutParams layoutParams;
-    private Button button;
+    String[] scripts;
+    Button fooView;
+    int checkedRadioButtonId = -1;
     /** 悬浮窗权限标识码 */
     public static final int CODE_WINDOW = 0;
+
+    Handler mHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message message) {
+            switch (message.what) {
+                case MessageType.EXCUTE_START:
+                    Log.d("humang_script", "handleMessage: EXCUTE_START");
+                    String filename = message.getData().getString("filename");
+                    FileUtil fileUtil = new FileUtil();
+                    String s = fileUtil.readFile(MainActivity.this, "script/"+filename);
+                    List<String> strings = fileUtil.parseFile(s);
+                    ScriptUtil.getInstance(MainActivity.this,mHandler).excuteScript(strings);
+                    fooView.setText("stop");
+                    break;
+                case MessageType.EXCUTE_COMPLETE:
+                    Log.d("humang_script", "handleMessage: EXCUTE_COMPLETE");
+                    fooView.setText("start");
+                    break;
+                case MessageType.EXCUTE_STOP:
+                    Log.d("humang_script", "handleMessage: EXCUTE_STOP");
+                    ScriptUtil.getInstance(MainActivity.this,mHandler).stopScript();
+                    fooView.setText("start");
+                    break;
+            }
+            return false;
+        }
+    });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,38 +75,75 @@ public class MainActivity extends Activity {
                 startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName())), CODE_WINDOW);
 //                ActivityCompat.requestPermissions(MainActivity.this,new String[]{Manifest.permission.GET_INSTALLED_APPS},1);
             }
-
         }
-        showFloatingWindow();
-        finish();
+        initSctiptFile();
+        initView();
+
+    }
+    private void initView() {
+        RadioGroup radioGroup = findViewById(R.id.script_list);
+        for (int i = 0; i < scripts.length; i++) {
+            RadioButton radioButton = new RadioButton(this);
+            radioButton.setText(scripts[i]);
+            radioButton.setTextSize(30);
+            radioGroup.addView(radioButton);
+        }
+        if (checkedRadioButtonId > 0) {
+            RadioButton radioButton = findViewById(checkedRadioButtonId);
+            radioButton.setChecked(true);
+        }
+        Button btConfirm = findViewById(R.id.confirm_button);
+        btConfirm.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                checkedRadioButtonId = radioGroup.getCheckedRadioButtonId();
+                RadioButton radioButton = findViewById(checkedRadioButtonId);
+                String filename = (String) radioButton.getText();
+                showFloatingWindow(filename);
+            }
+        });
+
+        findViewById(R.id.goback).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+    }
+
+    private void initSctiptFile() {
+        try {
+            scripts = getAssets().list("script");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     //调用该方法，可创建一个悬浮窗显示于屏幕之上
-    private void showFloatingWindow() {
-        button = new Button(this);
-        button.setBackgroundResource(R.drawable.bt_bg);
-        button.setText("start");
-        button.setOnTouchListener(new FloatingOnTouchListener());
-        button.setOnClickListener(new OnClickListener(){
+    private void showFloatingWindow(String filename) {
+        clearFooView();
+        fooView = new Button(this);
+        fooView.setBackgroundResource(R.drawable.bt_bg);
+        fooView.setText("start");
+        fooView.setOnTouchListener(new FloatingOnTouchListener());
+        fooView.setOnClickListener(new OnClickListener(){
             @Override
             public void onClick(View v) {
-                Button button = (Button) v;
-                FileUtil fileUtil = new FileUtil();
-                String s = fileUtil.readFile(MainActivity.this,"test.bat");
-                List<String> strings = fileUtil.parseFile(s);
-                if ("start".equals(button.getText())) {
-                    ScriptUtil.getInstance(MainActivity.this).excuteScript(strings);
-                    button.setText("stop");
-                } else if ("stop".equals(button.getText())) {
-                    ScriptUtil.getInstance(MainActivity.this).stopScript();
-                    button.setText("start");
+                Message message = mHandler.obtainMessage();
+                if ("start".equals(fooView.getText())) {
+                    message.what = MessageType.EXCUTE_START;
+                    Bundle bundle = new Bundle();
+                    bundle.putString("filename",filename);
+                    message.setData(bundle);
+                } else if ("stop".equals(fooView.getText())) {
+                    message.what = MessageType.EXCUTE_STOP;
                 }
-//                Toast.makeText(getApplication(), "我被点击了", Toast.LENGTH_SHORT).show();
+                mHandler.sendMessage(message);
             }
         });
 
         layoutParams = new WindowManager
-                .LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT, 0, 0, PixelFormat.TRANSPARENT);
+                .LayoutParams(50, 50, 0, 0, PixelFormat.TRANSPARENT);
         layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                 | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
@@ -87,7 +158,8 @@ public class MainActivity extends Activity {
         layoutParams.x = 0;
         layoutParams.y = 500;
         windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-        windowManager.addView(button, layoutParams);
+        windowManager.addView(fooView, layoutParams);
+
     }
 
     private class FloatingOnTouchListener implements View.OnTouchListener {
@@ -121,4 +193,15 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void clearFooView() {
+        if (fooView != null && windowManager != null) {
+            windowManager.removeView(fooView);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        clearFooView();
+        super.onDestroy();
+    }
 }

@@ -22,7 +22,7 @@ public class FileUtil {
         StringBuffer sb = new StringBuffer();
         try{
             InputStream inputStream = context.getAssets().open(filename);
-//            InputStream inputStream = new FileInputStream("sdcard/Download/test.bat");
+//            InputStream inputStream = new FileInputStream("sdcard/Download/douyin.bat");
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
             reader = new BufferedReader(inputStreamReader);
             String temp;
