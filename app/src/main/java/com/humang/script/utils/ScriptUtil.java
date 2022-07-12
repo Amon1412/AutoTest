@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -26,6 +27,7 @@ import java.util.regex.Pattern;
  * 主要功能 ：用于控制脚本的启动与暂停，单例模式保证同时只能执行一个脚本
  */
 public class ScriptUtil {
+    private boolean isPause;
     private boolean isStop;
     private Thread thread;
     private Context context;
@@ -45,23 +47,25 @@ public class ScriptUtil {
     public Map<String, String> vars = new HashMap<>();
 
     /*
-    * 启动脚本，如果有运行中的脚本会先停止
+    * 启动脚本，如果有暂停中的脚本会继续，有运行中的脚本会先停止
     * */
     public void excuteScript(List<String> batCmds){
         if (thread != null) {
-            stopScript();
+            if (isPause) {
+                notifyScript();
+                return;
+            } else {
+                stopScript();
+            }
         }
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 isStop = false;
-//                Log.e("humang_script", "startScript");
-//                saveLog();
                 excuteCmds(purity(batCmds));
                 Message message = handler.obtainMessage();
                 message.what = MessageType.EXCUTE_COMPLETE;
                 handler.sendMessage(message);
-//                Log.e("humang_script", "stopScript");
                 isStop = false;
             }
         });
@@ -69,14 +73,32 @@ public class ScriptUtil {
     }
 
     /*
+    * 暂停脚本，设置标记位为true，执行相应中断
+    * */
+    public void pauseScript() {
+        isPause = true;
+        Log.e("humang_script", "pause script");
+    }
+    /*
+     * 唤醒脚本，设置标记位为true，执行相应中断
+     * */
+    public void notifyScript() {
+        isPause = false;
+        if (thread !=null && !thread.isInterrupted()) {
+            thread.interrupt();
+            Log.e("humang_script", "notify script");
+        }
+    }
+
+    /*
     * 停止脚本，设置标记位为true，执行相应中断
     * */
     public void stopScript() {
         isStop = true;
-        if (thread!=null && !thread.isInterrupted()) {
+        if (thread !=null && !thread.isInterrupted()) {
             thread.interrupt();
             thread = null;
-            Log.e("humang_script", "closeThread");
+            Log.e("humang_script", "stop script");
         }
     }
 
@@ -103,6 +125,12 @@ public class ScriptUtil {
         for (int i = 0; i < batCmds.size(); i++) {
             if (isStop) {
                 break;
+            } else if (isPause){
+                try {
+                    Thread.sleep(Long.MAX_VALUE);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
             String cmd = batCmds.get(i);
 
@@ -175,6 +203,8 @@ public class ScriptUtil {
             }
             newBatCmds.add(batCmd);
         }
+        excuteCmd("input keyevent 3");
+        excuteCmd("echo \"返回桌面\"");
 //        Log.d("humang_script", "newBatCmds:"+newBatCmds);
         return newBatCmds;
     }
@@ -262,7 +292,13 @@ public class ScriptUtil {
         try {
             context.startActivity(intent);
         } catch (ActivityNotFoundException e) {
-            Log.e("humang_script", "no such activity.  " + e);
+            stopScript();
+            Log.e("humang_script", "no such activity.  " + cmd);
+            Message message = handler.obtainMessage(MessageType.SHOW_LOG);
+            Bundle bundle = new Bundle();
+            bundle.putString("log","脚本已停止运行：未找到目标activity  " + cmd) ;
+            message.setData(bundle);
+            handler.sendMessage(message);
         }
     }
 
@@ -289,9 +325,9 @@ public class ScriptUtil {
                     Thread.sleep(sleepTime);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                    if (isStop) {
-                        stopScript();
-                    }
+//                    if (isStop) {
+//                        stopScript();
+//                    }
                 }
                 return;
             }
@@ -307,6 +343,11 @@ public class ScriptUtil {
     public void excuteEcho(String cmd) {
         String substring = cmd.trim().substring(5);
         Log.d("humang_script", "echo : " + substring);
+        Message message = handler.obtainMessage(MessageType.SHOW_LOG);
+        Bundle bundle = new Bundle();
+        bundle.putString("log",substring);
+        message.setData(bundle);
+        handler.sendMessage(message);
     }
 
     /*

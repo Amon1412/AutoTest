@@ -2,4 +2,10 @@
     <string name="app_name">虎芒脚本</string>
     <string name="confirm">确定</string>
     <string name="select_script">请选择需要执行的脚本：</string>
+    <string name="script_menu">菜单</string>
+    <string name="script_start">开始</string>
+    <string name="script_pause">暂停</string>
+    <string name="script_stop">停止</string>
+    <string name="script_setting">设置</string>
+    <string name="script_close">关闭</string>
 </resources>
