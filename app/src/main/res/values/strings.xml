@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">虎芒脚本</string>
     <string name="confirm">确定</string>
+
     <string name="select_script">请选择需要执行的脚本：</string>
     <string name="script_menu">菜单</string>
     <string name="script_start">开始</string>
@@ -8,4 +9,18 @@
     <string name="script_stop">停止</string>
     <string name="script_setting">设置</string>
     <string name="script_close">关闭</string>
+
+    <string name="edit_click">点击事件</string>
+    <string name="edit_longclick">长按事件</string>
+    <string name="edit_swipe">滑动事件</string>
+    <string name="edit_input">输入事件</string>
+    <string name="edit_start_activity">启动应用</string>
+    <string name="edit_start_loop">开启循环</string>
+    <string name="edit_end_loop">结束循环</string>
+    <string name="edit_sleep">休眠操作</string>
+    <string name="edit_pause">暂停操作</string>
+    <string name="edit_home">返回桌面</string>
+    <string name="edit_back">返回上级</string>
+
+
 </resources>

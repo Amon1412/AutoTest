@@ -4,36 +4,15 @@
     <dimen name="layout_width">810dp</dimen>
     <dimen name="layout_height">1440dp</dimen>
     <dimen name="horizontal_margin">60dp</dimen>
+    <dimen name="split_line_height">1dp</dimen>
     <!--    header    -->
     <dimen name="header_title_height">120dp</dimen>
     <dimen name="header_font_size_title">36dp</dimen>
     <dimen name="header_ic_goback_size">36dp</dimen>
     <dimen name="header_select_font_size">24dp</dimen>
 
-    <!--    item    -->
-    <dimen name="item_height">120dp</dimen>
-    <dimen name="item_ic_width">96dp</dimen>
-    <dimen name="item_ic_height">84dp</dimen>
-    <dimen name="item_ic_margin_right">12dp</dimen>
-
-    <dimen name="item_title_font_size">30dp</dimen>
-    <dimen name="item_title_margin_bottom">12dp</dimen>
-    <dimen name="item_info_font_size">18dp</dimen>
-    <dimen name="item_info_margin">21dp</dimen>
-
-    <dimen name="item_checkbox_size">36dp</dimen>
-
-    <dimen name="split_line_margin_right">6dp</dimen>
-    <dimen name="split_line_height">1dp</dimen>
-
-    <!--    home    -->
-    <dimen name="home_bg_width">348dp</dimen>
-    <dimen name="home_bg_height">300dp</dimen>
-    <dimen name="home_bg_corner">39dp</dimen>
-    <dimen name="home_ic_width">120dp</dimen>
-    <dimen name="home_ic_height">120dp</dimen>
-    <dimen name="home_font_size">33dp</dimen>
-    <dimen name="home_margin_interval">20dp</dimen>
+    <!--    edit view-->
+    <dimen name="bt_size">80dp</dimen>
 
     <!--    footer      -->
     <dimen name="ic_loading_size">75dp</dimen>

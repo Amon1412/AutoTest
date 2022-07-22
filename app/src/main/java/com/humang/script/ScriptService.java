@@ -1,8 +1,10 @@
 package com.humang.script;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.Build;
@@ -18,7 +20,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -30,22 +34,28 @@ import java.util.List;
 public class ScriptService extends Service implements View.OnClickListener {
     private ScriptUtil mScriptUtil;
     private Context mContext;
-    public View mFootView;
-    public TextView mLogView;
     private String scriptName;
     private WindowManager windowManager;
     private WindowManager.LayoutParams layoutParams;
-    private boolean isShowLog;
+    private WindowManager.LayoutParams mMasklayoutParams;
+    
+    public View mMenuView;
+    private View mMaskView;
+    public TextView mLogView;
+    public TextView mPerformanceView;
 
-    private int fooviewX = 0;
-    private int fooviewY = 550;
+    private boolean isShowLog;
+    private boolean isShowPerformance;
+
+    private int menuViewX = 0;
+    private int menuViewY = 550;
 
     Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(@NonNull Message message) {
             switch (message.what) {
                 case MessageType.EXCUTE_MENU:
-                    hideMenu();
+                    showMenu();
                     break;
                 case MessageType.EXCUTE_START:
                     log("启动脚本：" + scriptName);
@@ -53,41 +63,48 @@ public class ScriptService extends Service implements View.OnClickListener {
                     String s = fileUtil.readFile(mContext, "script/"+scriptName);
                     List<String> strings = fileUtil.parseFile(s);
                     mScriptUtil.excuteScript(strings);
-                    showMenu();
+                    hideMenu();
                     break;
                 case MessageType.EXCUTE_PAUSE:
                     log("脚本暂停中\n",true);
                     mScriptUtil.pauseScript();
-                    showMenu();
+                    hideMenu();
                     break;
                 case MessageType.EXCUTE_STOP:
                     log("脚本已停止");
                     mScriptUtil.stopScript();
-                    showMenu();
+                    hideMenu();
                     break;
                 case MessageType.EXCUTE_SETTING:
+                    mScriptUtil.stopScript();
                     log("打开设置界面");
-                    showMenu();
+                    hideMenu();
                     Intent intent = new Intent(mContext, MainActivity.class);
                     intent.addCategory(Intent.CATEGORY_LAUNCHER);
                     intent.setAction(Intent.ACTION_MAIN);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
                     intent.putExtra("isShowLog",isShowLog);
+                    intent.putExtra("isShowPerformance",isShowPerformance);
                     mContext.startActivity(intent);
                     clearView();
                     break;
                 case MessageType.EXCUTE_CLOSE:
+                    mScriptUtil.stopScript();
                     log("脚本关闭");
                     clearView();
                     onDestroy();
                     break;
                 case MessageType.EXCUTE_COMPLETE:
-//                    log("脚本执行结束");
+                    log("脚本执行结束");
                     break;
                 case MessageType.SHOW_LOG:
                     String log = message.getData().getString("log");
                     boolean append = message.getData().getBoolean("append");
                     showLog(log,append);
+                    break;
+                case MessageType.SHOW_PERFORMANCE:
+                    String performance = message.getData().getString("performance");
+                    showPerformance(performance);
                     break;
                 default:
                     break;
@@ -96,8 +113,23 @@ public class ScriptService extends Service implements View.OnClickListener {
             return false;
         }
     });
+    private void popupDialog(int scriptType) {
+        TextView desTV = new TextView(this);
+        desTV.setText("请输入操作描述：");
+        EditText desET = new EditText(this);
 
-    public ScriptService(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(false)
+                .setView(desTV)
+                .setView(desET)
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Toast.makeText(ScriptService.this, "你输入的是: " + desET.getText().toString(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+        builder.setCancelable(true);
+        builder.create().show();
 
     }
 
@@ -106,11 +138,13 @@ public class ScriptService extends Service implements View.OnClickListener {
         Bundle extras = intent.getExtras();
         String scriptName = extras.getString("scriptName");
         boolean isShowLog = extras.getBoolean("isShowLog");
+        boolean isShowPerformance = extras.getBoolean("isShowPerformance");
 
         this.mContext = this;
         mScriptUtil = ScriptUtil.getInstance(this,mHandler);
         this.scriptName = scriptName;
         this.isShowLog = isShowLog;
+        this.isShowPerformance = isShowPerformance;
         windowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         initView();
 
@@ -136,6 +170,12 @@ public class ScriptService extends Service implements View.OnClickListener {
         mHandler.sendMessage(message);
     }
 
+    public void showPerformance(String performance) {
+        if (isShowPerformance && mPerformanceView != null) {
+            mPerformanceView.setText(performance);
+        }
+    }
+
     public void showLog(String log,boolean append) {
         if (isShowLog && mLogView != null) {
             if (append) {
@@ -146,30 +186,36 @@ public class ScriptService extends Service implements View.OnClickListener {
     }
 
     public void initView() {
-        addFooView();
+        addMaskView();
+        addMenuView();
         if (isShowLog) {
             addLogView();
         }
+        if (isShowPerformance) {
+            addPerformanceView();
+        }
     }
     private void clearView() {
-        clearFooView();
+        clearMaskView();
+        clearMenuView();
         clearLogView();
+        clearPerformanceView();
     }
 
-    private void addFooView() {
-        mFootView = LayoutInflater.from(mContext).inflate(R.layout.fooview,null);
-        mFootView.setOnTouchListener(new FloatingOnTouchListener());
-        Button menu = mFootView.findViewById(R.id.menu_bt);
+    private void addMenuView() {
+        mMenuView = LayoutInflater.from(mContext).inflate(R.layout.fooview_menu,null);
+        mMenuView.setOnTouchListener(new FloatingOnTouchListener());
+        Button menu = mMenuView.findViewById(R.id.menu_bt);
         menu.setOnClickListener(this);
-        Button start = mFootView.findViewById(R.id.start_bt);
+        Button start = mMenuView.findViewById(R.id.start_bt);
         start.setOnClickListener(this);
-        Button pause = mFootView.findViewById(R.id.pause_bt);
+        Button pause = mMenuView.findViewById(R.id.pause_bt);
         pause.setOnClickListener(this);
-        Button stop = mFootView.findViewById(R.id.stop_bt);
+        Button stop = mMenuView.findViewById(R.id.stop_bt);
         stop.setOnClickListener(this);
-        Button setting = mFootView.findViewById(R.id.setting_bt);
+        Button setting = mMenuView.findViewById(R.id.setting_bt);
         setting.setOnClickListener(this);
-        Button close = mFootView.findViewById(R.id.close_bt);
+        Button close = mMenuView.findViewById(R.id.close_bt);
         close.setOnClickListener(this);
         layoutParams = new WindowManager
                 .LayoutParams(50, 290, 0, 0, PixelFormat.TRANSPARENT);
@@ -184,9 +230,44 @@ public class ScriptService extends Service implements View.OnClickListener {
 
         layoutParams.format = PixelFormat.TRANSLUCENT;
         layoutParams.gravity = Gravity.LEFT | Gravity.TOP;
-        layoutParams.x = fooviewX;
-        layoutParams.y = fooviewY;
-        windowManager.addView(mFootView, layoutParams);
+        layoutParams.x = menuViewX;
+        layoutParams.y = menuViewY;
+        windowManager.addView(mMenuView, layoutParams);
+    }
+
+    private void addMaskView() {
+        mMaskView = new View(this);
+        mMaskView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                hideMenu();
+                return false;
+            }
+        });
+        mMaskView.setBackgroundColor(getColor(R.color.transparent));
+        mMasklayoutParams = new WindowManager
+                .LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 0, 0, PixelFormat.TRANSPARENT);
+        mMasklayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mMasklayoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            mMasklayoutParams.type = WindowManager.LayoutParams.TYPE_PHONE;
+        }
+        mMasklayoutParams.format = PixelFormat.TRANSLUCENT;
+        mMasklayoutParams.gravity = Gravity.LEFT | Gravity.TOP;
+        mMasklayoutParams.x = 0;
+        mMasklayoutParams.y = 0;
+        windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        windowManager.addView(mMaskView, mMasklayoutParams);
+    }
+    private void setMaskTouchable(boolean isTouchable) {
+        mMasklayoutParams.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+        if (isTouchable) {
+            mMasklayoutParams.flags ^= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+        }
+        windowManager.updateViewLayout(mMaskView, mMasklayoutParams);
     }
 
     @SuppressLint("ResourceAsColor")
@@ -210,6 +291,30 @@ public class ScriptService extends Service implements View.OnClickListener {
         layoutParams.format = PixelFormat.TRANSLUCENT;
         layoutParams.gravity = Gravity.CENTER;
         windowManager.addView(mLogView, layoutParams);
+    }
+    @SuppressLint("ResourceAsColor")
+    private void addPerformanceView() {
+        mPerformanceView = new TextView(mContext);
+        mPerformanceView.setTextColor(R.color.red);
+        mPerformanceView.setTextSize(20);
+        mPerformanceView.setGravity(Gravity.CENTER);
+        mPerformanceView.setBackgroundColor(getColor(R.color.mask));
+        WindowManager.LayoutParams layoutParams = new WindowManager
+                .LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, 0, 0, PixelFormat.TRANSPARENT);
+        layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            layoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            layoutParams.type = WindowManager.LayoutParams.TYPE_PHONE;
+        }
+        layoutParams.x = 100;
+        layoutParams.y = 100;
+        layoutParams.format = PixelFormat.TRANSLUCENT;
+        layoutParams.gravity = Gravity.TOP | Gravity.LEFT;
+        windowManager.addView(mPerformanceView, layoutParams);
     }
 
     @Override
@@ -258,8 +363,8 @@ public class ScriptService extends Service implements View.OnClickListener {
                     startY = nowY;
                     layoutParams.x = layoutParams.x + movedX;
                     layoutParams.y = layoutParams.y + movedY;
-                    fooviewX = layoutParams.x;
-                    fooviewY = layoutParams.y;
+                    menuViewX = layoutParams.x;
+                    menuViewY = layoutParams.y;
 
                     // 更新悬浮窗控件布局
                     windowManager.updateViewLayout(view, layoutParams);
@@ -271,16 +376,25 @@ public class ScriptService extends Service implements View.OnClickListener {
         }
     }
 
-    private void clearFooView() {
-        if (mFootView != null && windowManager != null) {
-            windowManager.removeView(mFootView);
+    private void clearMenuView() {
+        if (mMenuView != null && windowManager != null) {
+            windowManager.removeView(mMenuView);
         }
     }
-
+    private void clearMaskView() {
+        if (mMaskView != null && windowManager != null) {
+            windowManager.removeView(mMaskView);
+        }
+    }
 
     private void clearLogView (){
         if (mLogView != null && windowManager != null) {
             windowManager.removeView(mLogView);
+        }
+    }
+    private void clearPerformanceView (){
+        if (mPerformanceView != null && windowManager != null) {
+            windowManager.removeView(mPerformanceView);
         }
     }
 
@@ -314,13 +428,15 @@ public class ScriptService extends Service implements View.OnClickListener {
         mHandler.sendMessage(message);
     }
 
-    private void showMenu() {
-        mFootView.findViewById(R.id.menu_bt).setVisibility(View.VISIBLE);
-        mFootView.findViewById(R.id.function).setVisibility(View.INVISIBLE);
-    }
     private void hideMenu() {
-        mFootView.findViewById(R.id.menu_bt).setVisibility(View.INVISIBLE);
-        mFootView.findViewById(R.id.function).setVisibility(View.VISIBLE);
+        mMenuView.findViewById(R.id.menu_bt).setVisibility(View.VISIBLE);
+        mMenuView.findViewById(R.id.function).setVisibility(View.INVISIBLE);
+        setMaskTouchable(false);
+    }
+    private void showMenu() {
+        mMenuView.findViewById(R.id.menu_bt).setVisibility(View.INVISIBLE);
+        mMenuView.findViewById(R.id.function).setVisibility(View.VISIBLE);
+        setMaskTouchable(true);
     }
 
     @Override

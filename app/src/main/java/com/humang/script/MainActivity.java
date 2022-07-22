@@ -30,6 +30,7 @@ public class MainActivity extends Activity {
     public static final int CODE_WINDOW = 0;
 
     private Switch showLogSwitch;
+    private Switch showPerformanceSwitch;
     private String scriptName;
 
     @Override
@@ -37,9 +38,12 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         boolean isShowLog = getIntent().getBooleanExtra("isShowLog",true);
+        boolean isShowPerformance = getIntent().getBooleanExtra("isShowPerformance",true);
 
         showLogSwitch = findViewById(R.id.show_log);
         showLogSwitch.setChecked(isShowLog);
+        showPerformanceSwitch = findViewById(R.id.show_performance);
+        showPerformanceSwitch.setChecked(isShowPerformance);
 
         if (Build.VERSION.SDK_INT >= 23) {
             if (!Settings.canDrawOverlays(this)) {
@@ -98,11 +102,13 @@ public class MainActivity extends Activity {
     private void startScriptService() {
 
         boolean isShowLog = showLogSwitch.isChecked();
+        boolean isShowPerformance = showPerformanceSwitch.isChecked();
         Log.d("humang_script", "startScriptService: "+isShowLog);
 
         Intent intent = new Intent(this,ScriptService.class);
         intent.putExtra("scriptName",scriptName);
         intent.putExtra("isShowLog",isShowLog);
+        intent.putExtra("isShowPerformance",isShowPerformance);
         startService(intent);
         finish();
     }

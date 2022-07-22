@@ -4,17 +4,19 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.humang.script.MessageType;
 import com.humang.script.expression_parsing.ExpressionParse;
 import com.humang.script.expression_parsing.ExpressionTrans;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -29,7 +31,9 @@ import java.util.regex.Pattern;
 public class ScriptUtil {
     private boolean isPause;
     private boolean isStop;
-    private Thread thread;
+    private boolean isComplete;
+    private Thread scriptThread;
+    private Thread performanceThread;
     private Context context;
     private Handler handler;
 
@@ -50,7 +54,7 @@ public class ScriptUtil {
     * 启动脚本，如果有暂停中的脚本会继续，有运行中的脚本会先停止
     * */
     public void excuteScript(List<String> batCmds){
-        if (thread != null) {
+        if (scriptThread != null) {
             if (isPause) {
                 notifyScript();
                 return;
@@ -58,46 +62,54 @@ public class ScriptUtil {
                 stopScript();
             }
         }
-        thread = new Thread(new Runnable() {
+        scriptThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 isStop = false;
+                isComplete = false;
+                // 启动性能监听
+//                performanceMonitor();
+                // 执行脚本
                 excuteCmds(purity(batCmds));
-                Message message = handler.obtainMessage();
-                message.what = MessageType.EXCUTE_COMPLETE;
-                handler.sendMessage(message);
-                isStop = false;
+                if (!isStop) {
+                    isComplete = true;
+                    Message message = handler.obtainMessage();
+                    message.what = MessageType.EXCUTE_COMPLETE;
+                    handler.sendMessage(message);
+                }
             }
         });
-        thread.start();
+        scriptThread.start();
     }
 
-    /*
-    * 暂停脚本，设置标记位为true，执行相应中断
-    * */
-    public void pauseScript() {
-        isPause = true;
-        Log.e("humang_script", "pause script");
-    }
     /*
      * 唤醒脚本，设置标记位为true，执行相应中断
      * */
     public void notifyScript() {
         isPause = false;
-        if (thread !=null && !thread.isInterrupted()) {
-            thread.interrupt();
+        if (scriptThread !=null && !scriptThread.isInterrupted()) {
+            scriptThread.interrupt();
             Log.e("humang_script", "notify script");
         }
+    }
+
+    /*
+     * 暂停脚本，设置标记位为true，执行相应中断
+     * */
+    public void pauseScript() {
+        isPause = true;
+        Log.e("humang_script", "pause script");
     }
 
     /*
     * 停止脚本，设置标记位为true，执行相应中断
     * */
     public void stopScript() {
+        isPause = false;
         isStop = true;
-        if (thread !=null && !thread.isInterrupted()) {
-            thread.interrupt();
-            thread = null;
+        if (scriptThread !=null && !scriptThread.isInterrupted()) {
+            scriptThread.interrupt();
+            scriptThread = null;
             Log.e("humang_script", "stop script");
         }
     }
@@ -203,8 +215,8 @@ public class ScriptUtil {
             }
             newBatCmds.add(batCmd);
         }
-        excuteCmd("input keyevent 3");
-        excuteCmd("echo \"返回桌面\"");
+//        excuteCmd("input keyevent 3");
+//        excuteCmd("echo \"返回桌面\"");
 //        Log.d("humang_script", "newBatCmds:"+newBatCmds);
         return newBatCmds;
     }
@@ -365,15 +377,16 @@ public class ScriptUtil {
     /*
      * 将bat命令中的adb shell命令转为java方式
      * */
-    public void excuteAdbCmd(String cmd) {
+    public String excuteAdbCmd(String cmd) {
         cmd = cmd.replace("adb shell ","");
         if(isStartActivity(cmd)){
             excuteStartActivity(cmd);
-            return;
+            return "start activity";
         }
         String[] subCmds = cmd.trim().split(" ");
         String result = ShellUtil.getInstance().execute(subCmds);
         Log.e("humang_script", "excuteAdbCmd: "+cmd+"  result: "+result);
+        return result;
     }
 
     /*
@@ -413,6 +426,78 @@ public class ScriptUtil {
 
     public boolean isAdbCmd(String cmd) {
         return cmd.contains("adb shell ");
+    }
+
+    public void performanceMonitor() {
+        new Thread() {
+            @Override
+            public void run() {
+                Log.d("script", "isStop: "+isStop+"  isComplete: "+isComplete);
+                while (!(isStop || isComplete)) {
+                    String result = excuteAdbCmd("adb shell top -n 1");
+                    int beginIndex = result.indexOf("Mem");
+                    int endIndex = result.indexOf("host")+5;
+                    result = result.substring(beginIndex,endIndex);
+                    Log.d("script", "result: "+result);
+//                    float processCpuRate = getProcessCpuRate();
+                    Message message = handler.obtainMessage(MessageType.SHOW_PERFORMANCE);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("performance",result);
+                    message.setData(bundle);
+                    handler.sendMessage(message);
+                    try {
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }.start();
+    }
+    public float getProcessCpuRate() {
+        float totalCpuTime1 = getTotalCpuTime();
+        float processCpuTime1 = getAppCpuTime();
+        try {
+            Thread.sleep(360);
+        }
+        catch (Exception e)
+        {
+        }
+        float totalCpuTime2 = getTotalCpuTime();
+        float processCpuTime2 = getAppCpuTime();
+        float cpuRate = 100 * (processCpuTime2 - processCpuTime1)
+                / (totalCpuTime2 - totalCpuTime1);
+        return cpuRate;
+    }
+
+    public long getTotalCpuTime() {
+        // 获取系统总CPU使用时间
+        String result = excuteAdbCmd("cat /proc/stat");
+        String[] cpuInfos = result.split(" ");
+        long totalCpu = Long.parseLong(cpuInfos[2])
+                + Long.parseLong(cpuInfos[3]) + Long.parseLong(cpuInfos[4])
+                + Long.parseLong(cpuInfos[6]) + Long.parseLong(cpuInfos[5])
+                + Long.parseLong(cpuInfos[7]) + Long.parseLong(cpuInfos[8]);
+        return totalCpu;
+    }
+
+    public static long getAppCpuTime() { // 获取应用占用的CPU时间
+        String[] cpuInfos = null;
+        try {
+            int pid = android.os.Process.myPid();
+            BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(new FileInputStream("/proc/" + pid + "/stat")), 1000);
+            String load = reader.readLine();
+            reader.close();
+            cpuInfos = load.split(" ");
+        } catch (IOException ex)
+        {
+            ex.printStackTrace();
+        }
+        long appCpuTime = Long.parseLong(cpuInfos[13])
+                + Long.parseLong(cpuInfos[14]) + Long.parseLong(cpuInfos[15])
+                + Long.parseLong(cpuInfos[16]);
+        return appCpuTime;
     }
 }
 

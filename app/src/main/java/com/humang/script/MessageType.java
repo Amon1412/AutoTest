@@ -15,4 +15,9 @@ public interface MessageType {
     int EXCUTE_CLOSE = 5;
     int EXCUTE_COMPLETE = 6;
     int SHOW_LOG = 10;
+    int SHOW_PERFORMANCE = 11;
+
+
+    int MASK_TOUCHABLE = 41;
+    int MASK_NOT_TOUCHABLE = 42;
 }

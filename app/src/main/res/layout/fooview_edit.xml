@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bt_list"
+    android:layout_width="100dp"
+    android:layout_height="wrap_content"
+    android:layout_gravity="left"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:scrollbarAlwaysDrawVerticalTrack="true">
+
+
+    <Button
+        android:id="@+id/show_cmds"
+        android:layout_width="@dimen/bt_size"
+        android:layout_height="@dimen/bt_size"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/bt_bg"
+        android:text="查看命令记录"
+        android:textSize="8dp"
+        android:textStyle="bold" />
+<!--    <Button-->
+<!--        android:id="@+id/click_bt"-->
+<!--        android:layout_width="@dimen/bt_size"-->
+<!--        android:layout_height="@dimen/bt_size"-->
+<!--        android:layout_marginBottom="10dp"-->
+<!--        android:background="@drawable/bt_bg"-->
+<!--        android:text="@string/edit_click"-->
+<!--        android:textSize="8dp"-->
+<!--        android:textStyle="bold" />-->
+
+<!--    <Button-->
+<!--        android:id="@+id/longclick_bt"-->
+<!--        android:layout_width="@dimen/bt_size"-->
+<!--        android:layout_height="@dimen/bt_size"-->
+<!--        android:layout_marginBottom="10dp"-->
+<!--        android:background="@drawable/bt_bg"-->
+<!--        android:text="@string/edit_longclick"-->
+<!--        android:textSize="8dp"-->
+<!--        android:textStyle="bold" />-->
+
+<!--    <Button-->
+<!--        android:id="@+id/swipe_bt"-->
+<!--        android:layout_width="@dimen/bt_size"-->
+<!--        android:layout_height="@dimen/bt_size"-->
+<!--        android:layout_marginBottom="10dp"-->
+<!--        android:background="@drawable/bt_bg"-->
+<!--        android:text="@string/edit_swipe"-->
+<!--        android:textSize="8dp"-->
+<!--        android:textStyle="bold" />-->
+    <Button
+        android:id="@+id/input_bt"
+        android:layout_width="@dimen/bt_size"
+        android:layout_height="@dimen/bt_size"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/bt_bg"
+        android:text="@string/edit_input"
+        android:textSize="8dp"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/home_bt"
+        android:layout_width="@dimen/bt_size"
+        android:layout_height="@dimen/bt_size"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/bt_bg"
+        android:text="@string/edit_home"
+        android:textSize="8dp"
+        android:textStyle="bold" />
+    <Button
+        android:id="@+id/back_bt"
+        android:layout_width="@dimen/bt_size"
+        android:layout_height="@dimen/bt_size"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/bt_bg"
+        android:text="@string/edit_back"
+        android:textSize="8dp"
+        android:textStyle="bold" />
+    <Button
+        android:id="@+id/start_activity_bt"
+        android:layout_width="@dimen/bt_size"
+        android:layout_height="@dimen/bt_size"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/bt_bg"
+        android:text="@string/edit_start_activity"
+        android:textSize="8dp"
+        android:textStyle="bold" />
+    <Button
+        android:id="@+id/loop_start_bt"
+        android:layout_width="@dimen/bt_size"
+        android:layout_height="@dimen/bt_size"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/bt_bg"
+        android:text="@string/edit_start_loop"
+        android:textSize="8dp"
+        android:textStyle="bold" />
+    <Button
+        android:id="@+id/loop_end_bt"
+        android:layout_width="@dimen/bt_size"
+        android:layout_height="@dimen/bt_size"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/bt_bg"
+        android:text="@string/edit_end_loop"
+        android:textSize="8dp"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/sleep_bt"
+        android:layout_width="@dimen/bt_size"
+        android:layout_height="@dimen/bt_size"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/bt_bg"
+        android:text="@string/edit_sleep"
+        android:textSize="8dp"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/pause_bt"
+        android:layout_width="@dimen/bt_size"
+        android:layout_height="@dimen/bt_size"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/bt_bg"
+        android:text="@string/edit_pause"
+        android:textSize="8dp"
+        android:textStyle="bold" />
+
+</LinearLayout>
