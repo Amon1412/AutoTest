@@ -22,5 +22,8 @@
     <string name="edit_home">返回桌面</string>
     <string name="edit_back">返回上级</string>
 
+    <string name="keyboard_name">ADB Keyboard</string>
+    <string name="keyboard_on">ADB Keyboard {ON}</string>
+
 
 </resources>

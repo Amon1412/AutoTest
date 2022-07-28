@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    	
+    <dimen name="layout_width">480.0000dp</dimen>
+    	
+    <dimen name="layout_height">853.3333dp</dimen>
+    	
+    <dimen name="horizontal_margin">35.5556dp</dimen>
+    	
+    <dimen name="split_line_height">0.5926dp</dimen>
+    	
+    <dimen name="header_title_height">71.1111dp</dimen>
+    	
+    <dimen name="header_font_size_title">21.3333dp</dimen>
+    	
+    <dimen name="header_ic_goback_size">21.3333dp</dimen>
+    	
+    <dimen name="header_select_font_size">14.2222dp</dimen>
+    	
+    <dimen name="bt_size">47.4074dp</dimen>
+    	
+    <dimen name="ic_loading_size">44.4444dp</dimen>
+    	
+    <dimen name="foot_bt_size">53.3333dp</dimen>
+</resources>

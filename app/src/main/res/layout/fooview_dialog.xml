@@ -4,11 +4,35 @@
     android:layout_height="match_parent"
     android:background="@color/transparent">
     <LinearLayout
+        android:id="@+id/save_log"
+        android:layout_centerInParent="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/detail"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="请输入需要保存的文件名"/>
+        <EditText
+            android:id="@+id/filename_text"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"/>
+        <Button
+            android:id="@+id/save_ok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="确定">
+        </Button>
+    </LinearLayout>
+    <LinearLayout
         android:id="@+id/input_log"
         android:layout_centerInParent="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/mask"
+        android:background="@color/detail"
         android:orientation="vertical"
         android:gravity="center"
         android:visibility="gone">
@@ -32,7 +56,7 @@
         android:layout_centerInParent="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/mask"
+        android:background="@color/detail"
         android:orientation="vertical"
         android:gravity="center"
         android:visibility="gone">
@@ -56,18 +80,28 @@
         android:layout_centerInParent="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/mask"
+        android:background="@color/detail"
         android:orientation="vertical"
         android:gravity="center"
         android:visibility="gone">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="请输入需要启动的activity的包名与类名，格式如：com.ss.android.ugc.aweme/.splash.SplashActivity"/>
+            android:text="请输入需要休眠时间的固定毫秒数"/>
         <EditText
-            android:id="@+id/sleep_text"
+            android:id="@+id/min_sleep_text"
             android:layout_width="wrap_content"
-            android:layout_height="60dp"/>
+            android:layout_height="60dp"
+            android:text="2"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="请输入需要休眠时间的随机毫秒数上限"/>
+        <EditText
+            android:id="@+id/random_sleep_text"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="3"/>
         <Button
             android:id="@+id/sleep_ok"
             android:layout_width="wrap_content"

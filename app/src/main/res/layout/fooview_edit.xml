@@ -1,52 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/bt_list"
-    android:layout_width="100dp"
+    android:layout_width="120dp"
     android:layout_height="wrap_content"
-    android:layout_gravity="left"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:scrollbarAlwaysDrawVerticalTrack="true">
+    android:orientation="horizontal"
+    android:background="@color/transparent">
 
+    <LinearLayout
+        android:id="@+id/edit"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:scrollbarAlwaysDrawVerticalTrack="true">
 
     <Button
-        android:id="@+id/show_cmds"
+        android:id="@+id/cancel_edit"
         android:layout_width="@dimen/bt_size"
         android:layout_height="@dimen/bt_size"
         android:layout_marginBottom="10dp"
         android:background="@drawable/bt_bg"
-        android:text="查看命令记录"
+        android:text="取消编辑"
         android:textSize="8dp"
         android:textStyle="bold" />
-<!--    <Button-->
-<!--        android:id="@+id/click_bt"-->
-<!--        android:layout_width="@dimen/bt_size"-->
-<!--        android:layout_height="@dimen/bt_size"-->
-<!--        android:layout_marginBottom="10dp"-->
-<!--        android:background="@drawable/bt_bg"-->
-<!--        android:text="@string/edit_click"-->
-<!--        android:textSize="8dp"-->
-<!--        android:textStyle="bold" />-->
-
-<!--    <Button-->
-<!--        android:id="@+id/longclick_bt"-->
-<!--        android:layout_width="@dimen/bt_size"-->
-<!--        android:layout_height="@dimen/bt_size"-->
-<!--        android:layout_marginBottom="10dp"-->
-<!--        android:background="@drawable/bt_bg"-->
-<!--        android:text="@string/edit_longclick"-->
-<!--        android:textSize="8dp"-->
-<!--        android:textStyle="bold" />-->
-
-<!--    <Button-->
-<!--        android:id="@+id/swipe_bt"-->
-<!--        android:layout_width="@dimen/bt_size"-->
-<!--        android:layout_height="@dimen/bt_size"-->
-<!--        android:layout_marginBottom="10dp"-->
-<!--        android:background="@drawable/bt_bg"-->
-<!--        android:text="@string/edit_swipe"-->
-<!--        android:textSize="8dp"-->
-<!--        android:textStyle="bold" />-->
+    <Button
+        android:id="@+id/save_cmds"
+        android:layout_width="@dimen/bt_size"
+        android:layout_height="@dimen/bt_size"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/bt_bg"
+        android:text="保存"
+        android:textSize="8dp"
+        android:textStyle="bold" />
+    <Button
+        android:id="@+id/edit_cmds"
+        android:layout_width="@dimen/bt_size"
+        android:layout_height="@dimen/bt_size"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/bt_bg"
+        android:text="编辑脚本"
+        android:textSize="8dp"
+        android:textStyle="bold" />
     <Button
         android:id="@+id/input_bt"
         android:layout_width="@dimen/bt_size"
@@ -112,15 +106,12 @@
         android:text="@string/edit_sleep"
         android:textSize="8dp"
         android:textStyle="bold" />
-
+    </LinearLayout>
     <Button
-        android:id="@+id/pause_bt"
-        android:layout_width="@dimen/bt_size"
-        android:layout_height="@dimen/bt_size"
-        android:layout_marginBottom="10dp"
-        android:background="@drawable/bt_bg"
-        android:text="@string/edit_pause"
-        android:textSize="8dp"
-        android:textStyle="bold" />
+        android:id="@+id/control"
+        android:layout_gravity="center_vertical"
+        android:layout_width="20dp"
+        android:layout_height="50dp"
+        android:background="@drawable/hide"/>
 
 </LinearLayout>

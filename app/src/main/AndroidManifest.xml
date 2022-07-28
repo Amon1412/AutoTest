@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.humang.script"
+    package="com.humang.script_launcher"
     android:sharedUserId="android.uid.system">
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
@@ -14,17 +14,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Script">
         <activity
+            android:name=".EditActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity
-            android:name=".EditActivity"
-            android:exported="true" >
-
         </activity>
 
         <service
@@ -34,7 +33,18 @@
         <service
             android:name=".EditService"
             android:enabled="true"
-            android:exported="true"/>
+            android:exported="true" />
+
+        <!-- Declares the input method service -->
+        <service android:name=".ime.AdbIME"
+            android:label="@string/keyboard_name"
+            android:permission="android.permission.BIND_INPUT_METHOD"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.view.InputMethod" />
+            </intent-filter>
+            <meta-data android:name="android.view.im" android:resource="@xml/methods" />
+        </service>
     </application>
 
 </manifest>

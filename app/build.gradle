@@ -6,7 +6,7 @@ android {
     compileSdk 32
 
     defaultConfig {
-        applicationId "com.humang.script"
+        applicationId "com.humang.script_launcher"
         minSdk 29
         targetSdk 32
         versionCode 1

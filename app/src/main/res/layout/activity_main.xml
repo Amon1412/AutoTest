@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@drawable/humang_background"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="810dp"
+    android:layout_height="1040dp"
     android:orientation="vertical"
     tools:context=".MainActivity">
     <include
@@ -12,6 +12,8 @@
         layout="@layout/layout_header" />
 
     <LinearLayout
+        android:id="@+id/settings"
+        android:layout_below="@id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -19,12 +21,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/horizontal_margin">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="20dp"
+                android:text="是否在屏幕中间显示log"
                 android:textColor="@color/black"
-                android:text="是否在屏幕中间显示log"/>
+                android:textSize="30dp" />
             <Switch
                 android:id="@+id/show_log"
                 android:layout_alignParentRight="true"
@@ -35,47 +38,101 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/horizontal_margin">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="20dp"
+                android:text="是否在屏幕左上角显示性能"
                 android:textColor="@color/black"
-                android:text="是否在屏幕左上角显示性能"/>
+                android:textSize="30dp" />
             <Switch
                 android:id="@+id/show_performance"
                 android:layout_alignParentRight="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
         </RelativeLayout>
+        <Button
+            android:layout_below="@+id/settings"
+            android:id="@+id/default_edit_bt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/horizontal_margin"
+            android:text="设置默认参数"/>
+
+        <Button
+            android:layout_below="@id/default_edit_bt"
+            android:id="@+id/edit_bt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/horizontal_margin"
+            android:text="编辑脚本"/>
+
+        <View
+            android:layout_below="@id/edit_bt"
+            android:background="@color/black"
+            android:layout_height="@dimen/split_line_height"
+            android:layout_width="fill_parent"
+            android:layout_marginHorizontal="@dimen/horizontal_margin"/>
     </LinearLayout>
 
-
-    <View
-        android:background="@color/black"
-        android:layout_width="fill_parent"
-        android:layout_height="@dimen/split_line_height"
-        android:layout_marginHorizontal="@dimen/horizontal_margin"
-        android:layout_alignParentBottom="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/horizontal_margin"
-        android:text="@string/select_script"
-        android:textColor="@color/black"
-        android:textSize="30dp"/>
-    <RadioGroup
-        android:id="@+id/script_list"
+    <LinearLayout
+        android:layout_below="@+id/settings"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/horizontal_margin"
-        android:gravity="center_vertical">
-    </RadioGroup>
-    <Button
-        android:id="@+id/confirm_button"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/horizontal_margin"
+            android:text="@string/select_script"
+            android:textColor="@color/black"
+            android:textSize="30dp"/>
+        <RadioGroup
+            android:id="@+id/script_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/horizontal_margin"
+            android:gravity="center_vertical">
+        </RadioGroup>
+        <Button
+            android:id="@+id/confirm_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/horizontal_margin"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/confirm"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/edit_dialog"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/horizontal_margin"
-        android:layout_gravity="center_horizontal"
-        android:text="@string/confirm"/>
-</LinearLayout>
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="默认休眠固定时间(秒)"/>
+        <EditText
+            android:id="@+id/default_sleep_text"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="3"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="默认休眠随机时间(秒)"/>
+        <EditText
+            android:id="@+id/random_sleep_text"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="3"/>
+        <Button
+            android:id="@+id/edit_ok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="确定"/>
+    </LinearLayout>
+</RelativeLayout>

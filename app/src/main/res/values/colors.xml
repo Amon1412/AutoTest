@@ -10,6 +10,8 @@
     <color name="red">#FF0000</color>
     <color name="header_select_font_color">#ffff7631</color>
     <color name="font_color_setting_title">#ff111111</color>
-    <color name="mask">#33333333</color>
+    <color name="mask">#66666666</color>
+    <color name="detail">#33AAAAAA</color>
+    <color name="scroll_bar">#88888888</color>
     <color name="transparent">#00000000</color>
 </resources>

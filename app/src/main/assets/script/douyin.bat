@@ -4,6 +4,16 @@ chcp 65001
 setlocal enabledelayedexpansion
 
 :loop
+
+    for /l %%i in (1,1,20) do (
+        echo "循环第%%i轮"
+        timeout /T 1 /NOBREAK
+    )
+    for /l %%i in (1,1,20) do (
+        echo "循环2第%%i轮"
+        timeout /T 1 /NOBREAK
+    )
+
     echo "返回桌面"
     adb shell input keyevent 3
 

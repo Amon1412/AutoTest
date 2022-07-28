@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="810dp"
+    android:layout_height="1440dp"
+    tools:context=".EditActivity">
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="脚本管理:"/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/edit_script"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/create_script"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="创建脚本"/>
+    </LinearLayout>
+
+
+
+</RelativeLayout>
