@@ -6,12 +6,14 @@ import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
@@ -49,6 +51,7 @@ public class ScriptService extends Service implements View.OnClickListener {
 
     private boolean isShowLog;
     private boolean isShowPerformance;
+    private boolean startImmediately;
 
     private int menuViewX = 0;
     private int menuViewY = 550;
@@ -90,6 +93,7 @@ public class ScriptService extends Service implements View.OnClickListener {
                     intent.putExtra("isShowPerformance",isShowPerformance);
                     mContext.startActivity(intent);
                     clearView();
+                    onDestroy();
                     break;
                 case MessageType.EXCUTE_CLOSE:
                     mScriptUtil.stopScript();
@@ -104,6 +108,13 @@ public class ScriptService extends Service implements View.OnClickListener {
                     String log = message.getData().getString("log");
                     boolean append = message.getData().getBoolean("append");
                     showLog(log,append);
+                    break;
+                case MessageType.EXCUTE_REBOOT:
+                    SharedPreferences sp = getApplication().getSharedPreferences("humang_script",Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sp.edit();
+                    editor.putString("scriptName",scriptName);
+                    editor.apply();
+                    reboot();
                     break;
                 case MessageType.SHOW_PERFORMANCE:
                     String performance = message.getData().getString("performance");
@@ -143,9 +154,11 @@ public class ScriptService extends Service implements View.OnClickListener {
             String scriptName = extras.getString("scriptName");
             boolean isShowLog = extras.getBoolean("isShowLog");
             boolean isShowPerformance = extras.getBoolean("isShowPerformance");
+            boolean startImmediately = extras.getBoolean("startImmediately");
             this.scriptName = scriptName;
             this.isShowLog = isShowLog;
             this.isShowPerformance = isShowPerformance;
+            this.startImmediately = startImmediately;
         }
 
         Settings.Secure.putString(getContentResolver()
@@ -157,6 +170,10 @@ public class ScriptService extends Service implements View.OnClickListener {
         windowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         initView();
 
+        if (startImmediately) {
+            startScript();
+        }
+
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -165,6 +182,10 @@ public class ScriptService extends Service implements View.OnClickListener {
         super.onDestroy();
     }
 
+    private void reboot() {
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        pm.reboot("执行adb reboot命令");
+    }
     private void log(String log) {
         log(log,false);
     }

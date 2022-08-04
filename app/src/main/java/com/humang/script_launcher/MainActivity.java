@@ -3,8 +3,10 @@ package com.humang.script_launcher;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -38,6 +40,8 @@ public class MainActivity extends Activity {
     int defaultSleepTime = 3;
     int randomSleepTime = 3;
 
+    boolean startImmediately = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,6 +62,18 @@ public class MainActivity extends Activity {
         }
         initSctiptFile();
         initView();
+
+        SharedPreferences sp = getApplication().getSharedPreferences("humang_script", Context.MODE_PRIVATE);
+        String excutingScriptName = sp.getString("scriptName", "");
+        if (excutingScriptName != "") {
+            scriptName = excutingScriptName;
+            startImmediately = true;
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putString("scriptName","");
+            editor.putBoolean("startImmediately",false);
+            editor.apply();
+            startScriptService();
+        }
     }
 
     private void initView() {
@@ -104,7 +120,6 @@ public class MainActivity extends Activity {
         findViewById(R.id.edit_bt).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 startEditeService();
             }
         });
@@ -153,6 +168,7 @@ public class MainActivity extends Activity {
         intent.putExtra("scriptName",scriptName);
         intent.putExtra("isShowLog",isShowLog);
         intent.putExtra("isShowPerformance",isShowPerformance);
+        intent.putExtra("startImmediately",startImmediately);
         startService(intent);
         finish();
     }

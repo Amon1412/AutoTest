@@ -71,7 +71,11 @@ public class EditService extends Service implements View.OnClickListener {
 
     private boolean isEdit = false;
     private boolean isShow = false;
-    private int loopTag = 1;
+    private boolean isStop = false;
+
+    private int FOR_LOOP = 0;
+    private int ENDLESS_LOOP = 1;
+    private int loopType = -1;
 
     int defaultSleepTime = 3;
     int randomSleepTime = 3;
@@ -142,6 +146,25 @@ public class EditService extends Service implements View.OnClickListener {
                         inputText = text;
                         Settings.Secure.putString(getContentResolver()
                                 ,Settings.Secure.DEFAULT_INPUT_METHOD,ADB_IME);
+                        removeDialog();
+                    }
+                });
+                break;
+            case ScriptType.LOOP_START_ACTION:
+                mDialogView.findViewById(R.id.loop_start_log).setVisibility(View.VISIBLE);
+                Settings.Secure.putString(getContentResolver()
+                        ,Settings.Secure.DEFAULT_INPUT_METHOD,SYS_IME);
+                mDialogView.findViewById(R.id.loop_start_ok).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        int loopTime = Integer.parseInt(((EditText)mDialogView.findViewById(R.id.loop_time)).getText().toString());
+                        if (loopTime > 0) {
+                            loopType = FOR_LOOP;
+                            addCmd(String.format("for /l %%%%i in (1,1,%s) do (", loopTime));
+                        } else {
+                            loopType = ENDLESS_LOOP;
+                            addCmd(":loop");
+                        }
                         removeDialog();
                     }
                 });
@@ -234,11 +257,14 @@ public class EditService extends Service implements View.OnClickListener {
         cmdThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                while (true) {
+                while (!isStop) {
                     synchronized (cmdQueue) {
                         if (cmdQueue.size() == 0) {
                             try {
                                 cmdQueue.wait();
+                                if (isStop) {
+                                    return;
+                                }
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
@@ -293,6 +319,10 @@ public class EditService extends Service implements View.OnClickListener {
     }
 
     private void stopCmdThread() {
+        isStop = true;
+        synchronized (cmdQueue){
+            cmdQueue.notifyAll();
+        }
         if (cmdThread !=null && !cmdThread.isInterrupted()) {
             cmdThread.interrupt();
             cmdThread = null;
@@ -491,10 +521,17 @@ public class EditService extends Service implements View.OnClickListener {
                 execute("input keyevent 4");
                 break;
             case R.id.loop_start_bt:
-                addCmd(":loop"+loopTag++);
+                showDialog(ScriptType.LOOP_START_ACTION);
                 break;
             case R.id.loop_end_bt:
-                addCmd("goto loop"+(--loopTag));
+                if (loopType == ENDLESS_LOOP) {
+                    addCmd("goto loop");
+                } else if (loopType == FOR_LOOP) {
+                    addCmd(")");
+                } else {
+                    Toast.makeText(this,"请先添加循环开始标志",Toast.LENGTH_SHORT).show();
+                }
+                loopType = -1;
                 break;
             case R.id.sleep_bt:
                 showDialog(ScriptType.SLEEP_ACTION);

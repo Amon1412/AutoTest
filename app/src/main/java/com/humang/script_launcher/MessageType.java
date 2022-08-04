@@ -15,7 +15,7 @@ public interface MessageType {
     int EXCUTE_CLOSE = 5;
     int EXCUTE_COMPLETE = 6;
     int EXCUTE_FAILURED = 7;
-    int EXCUTE_CMD = 8;
+    int EXCUTE_REBOOT = 8;
     int SHOW_LOG = 10;
     int SHOW_PERFORMANCE = 11;
     int SAVE = 12;

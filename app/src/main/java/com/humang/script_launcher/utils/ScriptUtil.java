@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.util.Log;
 
 import com.humang.script_launcher.MessageType;
@@ -14,8 +15,11 @@ import com.humang.script_launcher.expression_parsing.ExpressionParse;
 import com.humang.script_launcher.expression_parsing.ExpressionTrans;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -33,6 +37,7 @@ public class ScriptUtil {
     private boolean isStop;
     private boolean isComplete;
     private Thread scriptThread;
+
     private Thread performanceThread;
     private Context context;
     private Handler handler;
@@ -57,6 +62,7 @@ public class ScriptUtil {
         if (scriptThread != null) {
             if (isPause) {
                 notifyScript();
+                logThread.start();
                 return;
             } else {
                 stopScript();
@@ -67,6 +73,7 @@ public class ScriptUtil {
             public void run() {
                 isStop = false;
                 isComplete = false;
+                saveLog();
                 excuteCmds(purity(batCmds));
                 if (!isStop) {
                     isComplete = true;
@@ -76,7 +83,9 @@ public class ScriptUtil {
                 }
             }
         });
+
         scriptThread.start();
+
     }
 
     /*
@@ -112,11 +121,42 @@ public class ScriptUtil {
     }
 
     public void saveLog() {
-        Date date = new Date();
-        String time = timeStamp2Date(date.getTime());
-        excuteAdbCmd("logcat > /sdcard/Download/log_"+time+".txt &");
-        Log.d("humang_script", "saveLog");
+        logThread.start();
     }
+    private Thread logThread = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            FileOutputStream os = null;
+            try {
+                //新建一个路径信息
+//                String cmd = "logcat -v threadtime -b main -b system -b radio -b events -b crash -b kernel";
+                String cmd = "logcat";
+                String[] subCmds = cmd.trim().split(" ");
+                Process exec = Runtime.getRuntime().exec(subCmds);
+                final InputStream is = exec.getInputStream();
+                os = new FileOutputStream("/sdcard/Download/Log.txt",true);
+                int len = 0;
+                byte[] buf = new byte[1024];
+                while ((-1 != (len = is.read(buf))) && !(isStop || isPause || isComplete) ){
+                    os.write(buf, 0, len);
+                    os.flush();
+                }
+            } catch (Exception e) {
+                Log.d("humang_script",
+                        "read logcat process failed. message: "
+                                + e.getMessage());
+            } finally {
+                if (null != os) {
+                    try {
+                        os.close();
+                        os = null;
+                    } catch (IOException e) {
+                        // Do nothing
+                    }
+                }
+            }
+        }
+    });
 
     public static String timeStamp2Date(long time) {
         String format = "yyyy-MM-dd_HH-mm-ss";
@@ -129,13 +169,10 @@ public class ScriptUtil {
     * */
     public void excuteCmds(List<String> batCmds) {
         Stack<Integer> loopStack = new Stack<>();
-        int loopStartIndex = -1;
-        int loopEndIndex = -1;
-        int forStartIndex = -1;
-        int forEndIndex = -1;
-        int forLoopTime = 0;
+        int loopCmdIndex = -1;
+        String loopCmd = "";
+        int loopTime = 1;
         ArrayList<String> loopCmds = new ArrayList<>();
-        ArrayList<String> forCmds = new ArrayList<>();
         for (int i = 0; i < batCmds.size(); i++) {
             if (isStop) {
                 break;
@@ -147,46 +184,39 @@ public class ScriptUtil {
                 }
             }
             String cmd = batCmds.get(i);
-            Log.d("script", "excuteCmds: " + cmd);
 
             // 判断是不是loop循环
-            if (isLoopStart(cmd)) {
-                loopStartIndex = i;
+            if (isLoopStart(cmd) || isForStart(cmd)) {
+                if (loopStack.size() > 0) {
+                    loopCmds.add(cmd);
+                }
                 loopStack.push(i);
-            } else if (isLoopEnd(cmd)){
-                loopEndIndex = i;
-//                loopEndIndex = loopStack.pop();
-            } else  if (loopStartIndex >= 0 && loopEndIndex < 0){
-//            } else  if (loopStack.size()>0){
+            } else if (isLoopEnd(cmd) || isForEnd(cmd)){
+                loopCmdIndex = loopStack.pop();
+                if (loopStack.size() > 0) {
+                    loopCmds.add(cmd);
+                }
+            } else  if (loopStack.size() > 0){
                 loopCmds.add(cmd);
                 continue;
             }
-            if (loopStartIndex >=0 && loopEndIndex > 0){
-//            if (loopStack.size() == 0){
-                excuteLoop(loopCmds);
-                loopCmds.clear();
-                loopStartIndex = -1;
-                loopEndIndex = -1;
+            // 循环栈为空，表示为最后一个循环或者普通命令
+            if (loopStack.size() == 0){
+                if (loopCmdIndex >= 0) {
+                    loopCmd  = batCmds.get(loopCmdIndex);
+                    if (isLoopStart(loopCmd)) {
+                        loopTime = 100;
+//                        loopTime = Integer.MAX_VALUE;
+                    } else if(isForStart(loopCmd)) {
+                        loopTime = getForTime(loopCmd);
+                    }
+                    Log.d("humang_script", "loopCmd: "+loopCmd+"  looptime: " +loopTime);
+                    excuteLoop(loopCmds,loopTime);
+                    loopCmds.clear();
+                } else {
+                    excuteCmd(cmd);
+                }
             }
-
-            // 判断是不是for循环
-            if (isForStart(cmd)) {
-                forStartIndex = i;
-                forLoopTime = getForTime(cmd);
-            } else if (isForEnd(cmd)){
-                forEndIndex = i;
-            } else  if (forStartIndex >= 0 && forEndIndex < 0){
-                forCmds.add(cmd);
-                continue;
-            }
-            if (forStartIndex >=0 && forEndIndex > 0){
-                excuteFor(forCmds,forLoopTime);
-                forCmds.clear();
-                forStartIndex = -1;
-                forEndIndex = -1;
-            }
-
-            excuteCmd(cmd);
         }
     }
 
@@ -204,7 +234,7 @@ public class ScriptUtil {
                 excuteEcho(cmd);
             } else if (isSleep(cmd)) {
                 excuteSleep(cmd);
-            }else if (
+            } else if (
                     isVariableDefine(cmd)
                             || isLoopStart(cmd)
                             || isLoopEnd(cmd)
@@ -214,13 +244,17 @@ public class ScriptUtil {
             } else if (isAdbCmd(cmd)){
                 Log.d("humang_script", "excute adb cmd : " + cmd);
                 excuteAdbCmd(cmd);
+            } else if (isRebootCmd(cmd)) {
+                excuteReboot();
             } else {
-                Log.e("humang_script","未知命令，无法处理："+cmd);
+//                Log.e("humang_script","未知命令，无法处理："+cmd);
+                    Log.d("humang_script", "excute nomal cmd : " + cmd);
+                    excuteNomalCmd(cmd);
+
             }
         } catch (Exception e) {
             Log.e("humang_script", "excuteCmd: "+cmd, e);
         }
-
     }
 
     /*
@@ -242,9 +276,6 @@ public class ScriptUtil {
             }
             newBatCmds.add(batCmd);
         }
-//        excuteCmd("input keyevent 3");
-//        excuteCmd("echo \"返回桌面\"");
-//        Log.d("humang_script", "newBatCmds:"+newBatCmds);
         return newBatCmds;
     }
 
@@ -366,9 +397,6 @@ public class ScriptUtil {
                     Thread.sleep(sleepTime);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-//                    if (isStop) {
-//                        stopScript();
-//                    }
                 }
                 return;
             }
@@ -394,21 +422,11 @@ public class ScriptUtil {
     /*
      * 将bat命令中的loop循环转为java方式
      * */
-    public void excuteLoop(ArrayList<String> cmds) {
-        int loopTimes = 0;
-        while (!isStop){
-            loopTimes += 1;
-            Log.d("humang_script", "loopTimes ------------------------ " + loopTimes);
-            excuteCmds(cmds);
-        }
-    }
-
-    public void excuteFor(ArrayList<String> cmds,int loopTime) {
+    public void excuteLoop(ArrayList<String> cmds,int loopTime) {
         int loopTimes = 0;
         while (!isStop && loopTimes < loopTime){
             loopTimes += 1;
-            vars.put("%%i",String.valueOf(loopTimes));
-            Log.d("humang_script", "loopTimes ------------------------ " + loopTimes);
+            Log.d("humang_script", "looptime " + loopTime + "   looptimes" + loopTimes);
             excuteCmds(cmds);
         }
     }
@@ -422,11 +440,27 @@ public class ScriptUtil {
             excuteStartActivity(cmd);
             return "start activity";
         }
+        return excuteNomalCmd(cmd);
+    }
+
+    /*
+     * 直接执行命令
+     * */
+    public String excuteNomalCmd(String cmd) {
         String[] subCmds = cmd.trim().split(" ");
         String result = ShellUtil.getInstance().execute(subCmds);
         Log.e("humang_script", "excuteAdbCmd: "+cmd+"  result: "+result);
         return result;
     }
+
+
+    /*
+     * 执行重启命令
+     * */
+    public void excuteReboot() {
+        handler.sendMessage(handler.obtainMessage(MessageType.EXCUTE_REBOOT));
+    }
+
 
     /*
     * 正则匹配，根据规则返回匹配结果
@@ -472,7 +506,7 @@ public class ScriptUtil {
     }
 
     public boolean isForVar(String cmd) {
-        return cmd.contains("%%i");
+        return !isForStart(cmd) && cmd.contains("%%i");
     }
 
     public boolean isSleep(String cmd) {
@@ -495,6 +529,10 @@ public class ScriptUtil {
         return cmd.contains("adb shell ");
     }
 
+    public boolean isRebootCmd(String cmd) {
+        return cmd.contains("adb reboot");
+    }
+
     public void performanceMonitor() {
         new Thread() {
             @Override
@@ -506,10 +544,10 @@ public class ScriptUtil {
                     int endIndex = result.indexOf("host")+5;
                     result = result.substring(beginIndex,endIndex);
                     Log.d("script", "result: "+result);
-//                    float processCpuRate = getProcessCpuRate();
+                    float processCpuRate = getProcessCpuRate();
                     Message message = handler.obtainMessage(MessageType.SHOW_PERFORMANCE);
                     Bundle bundle = new Bundle();
-                    bundle.putString("performance",result);
+                    bundle.putString("performance",processCpuRate+"");
                     message.setData(bundle);
                     handler.sendMessage(message);
                     try {

@@ -52,6 +52,30 @@
         </Button>
     </LinearLayout>
     <LinearLayout
+        android:id="@+id/loop_start_log"
+        android:layout_centerInParent="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/detail"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="请输入需要循环的次数,小于等于0即为死循环"/>
+        <EditText
+            android:id="@+id/loop_time"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"/>
+        <Button
+            android:id="@+id/loop_start_ok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="确定">
+        </Button>
+    </LinearLayout>
+    <LinearLayout
         android:id="@+id/start_activity_log"
         android:layout_centerInParent="true"
         android:layout_width="wrap_content"

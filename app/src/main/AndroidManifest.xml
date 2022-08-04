@@ -3,8 +3,21 @@
     package="com.humang.script_launcher"
     android:sharedUserId="android.uid.system">
 
+    <uses-permission android:name="android.permission.REBOOT" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="com.android.permission.GET_INSTALLED_APPS" />
+    <!--.接收启动完成的广播权限-->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- 读取Log权限 -->
+    <uses-permission android:name="android.permission.READ_LOGS" />
+    <!-- 在SDCard中创建与删除文件权限 -->
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+    <!-- 往SDCard写入数据权限 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- 从SDCard读出数据权限 -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.DUMP"/>
 
     <application
         android:allowBackup="true"
@@ -45,6 +58,16 @@
             </intent-filter>
             <meta-data android:name="android.view.im" android:resource="@xml/methods" />
         </service>
+
+        <receiver
+            android:name=".BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
