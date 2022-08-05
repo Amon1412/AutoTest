@@ -21,7 +21,7 @@ public class FileUtil {
     public String readFile(Context context,String filename){
         BufferedReader reader = null;
         StringBuffer sb = new StringBuffer();
-        try{
+        try {
             InputStream inputStream = null;
             if (filename.contains("通用脚本：")) {
                 inputStream = context.getAssets().open(filename.replace("通用脚本：","script/"));
@@ -36,9 +36,9 @@ public class FileUtil {
                 sb.append("\n");
             }
             reader.close();
-        }catch(IOException e){
+        } catch (Exception e){
             e.printStackTrace();
-        }finally{
+        } finally {
             if(reader != null){
                 try {
                     reader.close();

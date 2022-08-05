@@ -7,7 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.PowerManager;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.humang.script_launcher.MessageType;
@@ -15,7 +15,6 @@ import com.humang.script_launcher.expression_parsing.ExpressionParse;
 import com.humang.script_launcher.expression_parsing.ExpressionTrans;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -33,9 +32,15 @@ import java.util.regex.Pattern;
  * 主要功能 ：用于控制脚本的启动与暂停，单例模式保证同时只能执行一个脚本
  */
 public class ScriptUtil {
-    private boolean isPause;
-    private boolean isStop;
-    private boolean isComplete;
+    private static final String ADB_IME = "com.humang.script_launcher/.ime.AdbIME";
+    private static final String SYS_IME = "com.android.inputmethod.pinyin/.PinyinIME";
+
+    public static final int READY = 0;
+    public static final int RUNING = 1;
+    public static final int PAUSE = 2;
+    public static final int STOP = 3;
+    public static final int COMPLETE = 4;
+    private int state;
     private Thread scriptThread;
 
     private Thread performanceThread;
@@ -59,10 +64,15 @@ public class ScriptUtil {
     * 启动脚本，如果有暂停中的脚本会继续，有运行中的脚本会先停止
     * */
     public void excuteScript(List<String> batCmds){
+        Settings.Secure.putString(context.getContentResolver()
+                ,Settings.Secure.DEFAULT_INPUT_METHOD,ADB_IME);
+        if (state == RUNING) {
+            return;
+        }
         if (scriptThread != null) {
-            if (isPause) {
+            if (state == PAUSE) {
                 notifyScript();
-                logThread.start();
+                saveLog();
                 return;
             } else {
                 stopScript();
@@ -71,12 +81,11 @@ public class ScriptUtil {
         scriptThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                isStop = false;
-                isComplete = false;
+                state = RUNING;
                 saveLog();
                 excuteCmds(purity(batCmds));
-                if (!isStop) {
-                    isComplete = true;
+                if (state != STOP) {
+                    state = COMPLETE;
                     Message message = handler.obtainMessage();
                     message.what = MessageType.EXCUTE_COMPLETE;
                     handler.sendMessage(message);
@@ -92,7 +101,7 @@ public class ScriptUtil {
      * 唤醒脚本，设置标记位为true，执行相应中断
      * */
     public void notifyScript() {
-        isPause = false;
+        state = RUNING;
         if (scriptThread !=null && !scriptThread.isInterrupted()) {
             scriptThread.interrupt();
             Log.e("humang_script", "notify script");
@@ -103,7 +112,12 @@ public class ScriptUtil {
      * 暂停脚本，设置标记位为true，执行相应中断
      * */
     public void pauseScript() {
-        isPause = true;
+        Settings.Secure.putString(context.getContentResolver()
+                ,Settings.Secure.DEFAULT_INPUT_METHOD,SYS_IME);
+        if (state == PAUSE) {
+            return;
+        }
+        state = PAUSE;
         Log.e("humang_script", "pause script");
     }
 
@@ -111,8 +125,12 @@ public class ScriptUtil {
     * 停止脚本，设置标记位为true，执行相应中断
     * */
     public void stopScript() {
-        isPause = false;
-        isStop = true;
+        Settings.Secure.putString(context.getContentResolver()
+                ,Settings.Secure.DEFAULT_INPUT_METHOD,SYS_IME);
+        if (state == STOP) {
+            return;
+        }
+        state = STOP;
         if (scriptThread !=null && !scriptThread.isInterrupted()) {
             scriptThread.interrupt();
             scriptThread = null;
@@ -121,42 +139,43 @@ public class ScriptUtil {
     }
 
     public void saveLog() {
-        logThread.start();
-    }
-    private Thread logThread = new Thread(new Runnable() {
-        @Override
-        public void run() {
-            FileOutputStream os = null;
-            try {
-                //新建一个路径信息
+        Thread logThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                FileOutputStream os = null;
+                try {
+                    //新建一个路径信息
 //                String cmd = "logcat -v threadtime -b main -b system -b radio -b events -b crash -b kernel";
-                String cmd = "logcat";
-                String[] subCmds = cmd.trim().split(" ");
-                Process exec = Runtime.getRuntime().exec(subCmds);
-                final InputStream is = exec.getInputStream();
-                os = new FileOutputStream("/sdcard/Download/Log.txt",true);
-                int len = 0;
-                byte[] buf = new byte[1024];
-                while ((-1 != (len = is.read(buf))) && !(isStop || isPause || isComplete) ){
-                    os.write(buf, 0, len);
-                    os.flush();
-                }
-            } catch (Exception e) {
-                Log.d("humang_script",
-                        "read logcat process failed. message: "
-                                + e.getMessage());
-            } finally {
-                if (null != os) {
-                    try {
-                        os.close();
-                        os = null;
-                    } catch (IOException e) {
-                        // Do nothing
+                    String cmd = "logcat";
+                    String[] subCmds = cmd.trim().split(" ");
+                    Process exec = Runtime.getRuntime().exec(subCmds);
+                    final InputStream is = exec.getInputStream();
+                    os = new FileOutputStream("/sdcard/Download/Log.txt",true);
+                    int len = 0;
+                    byte[] buf = new byte[1024];
+                    while ((-1 != (len = is.read(buf))) && (state == RUNING) ){
+                        os.write(buf, 0, len);
+                        os.flush();
+                    }
+                    Log.d("humang_script", "logThread close ");
+                } catch (Exception e) {
+                    Log.d("humang_script",
+                            "read logcat process failed. message: "
+                                    + e.getMessage());
+                } finally {
+                    if (null != os) {
+                        try {
+                            os.close();
+                            os = null;
+                        } catch (IOException e) {
+                            // Do nothing
+                        }
                     }
                 }
             }
-        }
-    });
+        });
+        logThread.start();
+    }
 
     public static String timeStamp2Date(long time) {
         String format = "yyyy-MM-dd_HH-mm-ss";
@@ -174,9 +193,9 @@ public class ScriptUtil {
         int loopTime = 1;
         ArrayList<String> loopCmds = new ArrayList<>();
         for (int i = 0; i < batCmds.size(); i++) {
-            if (isStop) {
+            if (state == STOP) {
                 break;
-            } else if (isPause){
+            } else if (state == PAUSE){
                 try {
                     Thread.sleep(Long.MAX_VALUE);
                 } catch (InterruptedException e) {
@@ -205,8 +224,7 @@ public class ScriptUtil {
                 if (loopCmdIndex >= 0) {
                     loopCmd  = batCmds.get(loopCmdIndex);
                     if (isLoopStart(loopCmd)) {
-                        loopTime = 100;
-//                        loopTime = Integer.MAX_VALUE;
+                        loopTime = Integer.MAX_VALUE;
                     } else if(isForStart(loopCmd)) {
                         loopTime = getForTime(loopCmd);
                     }
@@ -234,12 +252,11 @@ public class ScriptUtil {
                 excuteEcho(cmd);
             } else if (isSleep(cmd)) {
                 excuteSleep(cmd);
-            } else if (
-                    isVariableDefine(cmd)
-                            || isLoopStart(cmd)
-                            || isLoopEnd(cmd)
-                            || isForStart(cmd)
-                            || isForEnd(cmd)){
+            } else if (isVariableDefine(cmd)
+                        || isLoopStart(cmd)
+                        || isLoopEnd(cmd)
+                        || isForStart(cmd)
+                        || isForEnd(cmd)){
                 return;
             } else if (isAdbCmd(cmd)){
                 Log.d("humang_script", "excute adb cmd : " + cmd);
@@ -291,11 +308,8 @@ public class ScriptUtil {
         while (!value.equals(realValue)) {
             value = realValue;
             realValue = replaceVariable(value);
-//            Log.d("humang_script", "value = " + value);
-//            Log.d("humang_script", "realValue = " + realValue);
         }
         realValue = calculateVariable(realValue);
-//        Log.d("humang_script", "defineVariable:"+ key +" = "+realValue);
         vars.put(key,realValue);
     }
 
@@ -392,6 +406,11 @@ public class ScriptUtil {
         for (int i = 0; i < subCmds.length; i++) {
             if (findSleepTime) {
                 int sleepTime = Integer.parseInt(subCmds[i]) * 1000;
+                Message message = handler.obtainMessage(MessageType.SHOW_LOG);
+                Bundle bundle = new Bundle();
+                bundle.putString("log", String.format("休眠 %s 秒", sleepTime/1000));
+                message.setData(bundle);
+                handler.sendMessage(message);
                 Log.d("humang_script", "sleep : " + sleepTime);
                 try {
                     Thread.sleep(sleepTime);
@@ -424,7 +443,7 @@ public class ScriptUtil {
      * */
     public void excuteLoop(ArrayList<String> cmds,int loopTime) {
         int loopTimes = 0;
-        while (!isStop && loopTimes < loopTime){
+        while (state == RUNING && loopTimes < loopTime){
             loopTimes += 1;
             Log.d("humang_script", "looptime " + loopTime + "   looptimes" + loopTimes);
             excuteCmds(cmds);
@@ -537,8 +556,7 @@ public class ScriptUtil {
         new Thread() {
             @Override
             public void run() {
-                Log.d("script", "isStop: "+isStop+"  isComplete: "+isComplete);
-                while (!(isStop || isComplete)) {
+                while (state == RUNING) {
                     String result = excuteAdbCmd("adb shell top -n 1");
                     int beginIndex = result.indexOf("Mem");
                     int endIndex = result.indexOf("host")+5;

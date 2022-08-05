@@ -35,7 +35,6 @@ import com.humang.script_launcher.utils.ScriptUtil;
 import java.util.List;
 
 public class ScriptService extends Service implements View.OnClickListener {
-    private static final String ADB_IME = "com.humang.script_launcher/.ime.AdbIME";
 
     private ScriptUtil mScriptUtil;
     private Context mContext;
@@ -160,9 +159,6 @@ public class ScriptService extends Service implements View.OnClickListener {
             this.isShowPerformance = isShowPerformance;
             this.startImmediately = startImmediately;
         }
-
-        Settings.Secure.putString(getContentResolver()
-                ,Settings.Secure.DEFAULT_INPUT_METHOD,ADB_IME);
 
         this.mContext = this;
         mScriptUtil = ScriptUtil.getInstance(this,mHandler);

@@ -18,6 +18,7 @@
     <string name="edit_start_loop">开启循环</string>
     <string name="edit_end_loop">结束循环</string>
     <string name="edit_sleep">休眠操作</string>
+    <string name="edit_reboot">重启操作</string>
     <string name="edit_pause">暂停操作</string>
     <string name="edit_home">返回桌面</string>
     <string name="edit_back">返回上级</string>

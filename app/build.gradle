@@ -5,6 +5,7 @@ plugins {
 android {
     compileSdk 32
 
+    namespace 'com.humang.script_launcher'
     defaultConfig {
         applicationId "com.humang.script_launcher"
         minSdk 29
@@ -23,6 +24,7 @@ android {
             storePassword "backpack666"
             keyPassword "backpack666"
             keyAlias "backpack"
+
         }
     }
 

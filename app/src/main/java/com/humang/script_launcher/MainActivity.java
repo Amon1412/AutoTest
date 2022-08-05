@@ -141,7 +141,6 @@ public class MainActivity extends Activity {
         }
     }
 
-
     public String[]  getAllDataFileName(String folderPath){
         ArrayList<String> fileList = new ArrayList<>();
         File file = new File(folderPath);
@@ -172,6 +171,7 @@ public class MainActivity extends Activity {
         startService(intent);
         finish();
     }
+
     //调用该方法，可创建一个悬浮窗显示于屏幕之上
     private void startEditeService() {
         Intent intent = new Intent(this,EditService.class);

@@ -106,6 +106,15 @@
         android:text="@string/edit_sleep"
         android:textSize="8dp"
         android:textStyle="bold" />
+    <Button
+        android:id="@+id/reboot_bt"
+        android:layout_width="@dimen/bt_size"
+        android:layout_height="@dimen/bt_size"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/bt_bg"
+        android:text="@string/edit_reboot"
+        android:textSize="8dp"
+        android:textStyle="bold" />
     </LinearLayout>
     <Button
         android:id="@+id/control"

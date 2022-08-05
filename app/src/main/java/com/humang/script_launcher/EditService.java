@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -53,10 +54,10 @@ public class EditService extends Service implements View.OnClickListener {
     private WindowManager.LayoutParams mDetailLayoutParams;
     private WindowManager.LayoutParams mDialogLayoutParams;
     private View mMenuView;
-    private View mEditView;
     private View mMaskView;
     private View mDetailView;
     private View mDialogView;
+    private LinearLayout mEditView;
     private RecyclerView mDetailRecycleView;
     private SubItemAdapter mSubItemAdapter;
     private View deleteBt;
@@ -362,6 +363,7 @@ public class EditService extends Service implements View.OnClickListener {
         mMenuView.findViewById(R.id.home_bt).setOnClickListener(this);
         mMenuView.findViewById(R.id.back_bt).setOnClickListener(this);
         mMenuView.findViewById(R.id.sleep_bt).setOnClickListener(this);
+        mMenuView.findViewById(R.id.reboot_bt).setOnClickListener(this);
 
         mMenuLayoutParams = new WindowManager
                 .LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, 0, 0, PixelFormat.TRANSPARENT);
@@ -535,6 +537,9 @@ public class EditService extends Service implements View.OnClickListener {
                 break;
             case R.id.sleep_bt:
                 showDialog(ScriptType.SLEEP_ACTION);
+                break;
+            case R.id.reboot_bt:
+                addCmd("adb reboot");
                 break;
             default:
                 return;
