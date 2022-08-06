@@ -1,6 +1,7 @@
 package com.humang.script_launcher.utils;
 
 import android.content.Context;
+import android.os.Environment;
 import android.util.Log;
 
 import java.io.*;
@@ -26,7 +27,7 @@ public class FileUtil {
             if (filename.contains("通用脚本：")) {
                 inputStream = context.getAssets().open(filename.replace("通用脚本：","script/"));
             } else if (filename.contains("本地脚本：")) {
-                inputStream = new FileInputStream(context.getFilesDir().getAbsolutePath()+filename.replace("本地脚本：","/"));
+                inputStream = new FileInputStream(Environment.getExternalStorageDirectory()+"/Download/"+filename.replace("本地脚本：","/"));
             }
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
             reader = new BufferedReader(inputStreamReader);

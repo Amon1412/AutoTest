@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -43,7 +44,7 @@ import java.util.Random;
  * @author : created by amon
  * 时间 : 2022/7/21 11
  * 邮箱 ： yimeng.tang@humang.com
- * 主要功能 ：
+ * 主要功能 ：用于录制脚本
  */
 public class EditService extends Service implements View.OnClickListener {
     private static final String ADB_IME = "com.humang.script_launcher/.ime.AdbIME";
@@ -104,6 +105,14 @@ public class EditService extends Service implements View.OnClickListener {
                     break;
                 case MessageType.EXCUTE_FAILURED:
                     Toast.makeText(EditService.this,"命令执行失败，请重试",Toast.LENGTH_SHORT).show();
+                    break;
+                case MessageType.EXCUTE_CANCEAL:
+                    Intent intent = new Intent(EditService.this, MainActivity.class);
+                    intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                    intent.setAction(Intent.ACTION_MAIN);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                    startActivity(intent);
+                    onDestroy();
                     break;
                 default:
                     break;
@@ -215,7 +224,7 @@ public class EditService extends Service implements View.OnClickListener {
                     public void onClick(View v) {
                         String filename = ((EditText)mDialogView.findViewById(R.id.filename_text)).getText().toString();
                         removeDialog();
-                        File file = new File(getFilesDir(), filename+".bat");
+                        File file = new File(Environment.getExternalStorageDirectory()+"/Download", filename+".bat");
                         try {
                             FileOutputStream fos=new FileOutputStream(file,true);
                             Iterator<String> iterator = cmds.iterator();
@@ -255,20 +264,26 @@ public class EditService extends Service implements View.OnClickListener {
     }
 
     private void initCmdThread() {
+        if (cmdThread != null) {
+            stopCmdThread();
+            cmdThread = null;
+        }
         cmdThread = new Thread(new Runnable() {
             @Override
             public void run() {
+                isStop = false;
                 while (!isStop) {
                     synchronized (cmdQueue) {
                         if (cmdQueue.size() == 0) {
                             try {
                                 cmdQueue.wait();
-                                if (isStop) {
-                                    return;
-                                }
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
+                        }
+                        if (isStop) {
+                            Log.d("amon","cmdThread close");
+                            return;
                         }
                         int scriptType = cmdQueue.remove();
                         mHandler.sendMessage(mHandler.obtainMessage(MessageType.MASK_NOT_TOUCHABLE));
@@ -306,17 +321,15 @@ public class EditService extends Service implements View.OnClickListener {
                         Log.d("amon", "cmd: "+cmd);
                         Log.d("amon", "result: "+result);
                         mHandler.sendMessage(mHandler.obtainMessage(MessageType.MASK_TOUCHABLE));
-                        try {
-                            cmdQueue.wait();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+
                     }
                 }
 
             }
         });
         cmdThread.start();
+        Log.d("amon","cmdThread start");
+
     }
 
     private void stopCmdThread() {
@@ -478,13 +491,7 @@ public class EditService extends Service implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.cancel_edit:
-                Intent intent = new Intent(EditService.this, MainActivity.class);
-                intent.addCategory(Intent.CATEGORY_LAUNCHER);
-                intent.setAction(Intent.ACTION_MAIN);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-                startActivity(intent);
-
-                onDestroy();
+                mHandler.sendMessage(mHandler.obtainMessage(MessageType.EXCUTE_CANCEAL));
                 break;
             case R.id.control:
                 isShow = !isShow;
@@ -634,10 +641,10 @@ public class EditService extends Service implements View.OnClickListener {
 
     @Override
     public void onDestroy() {
+        super.onDestroy();
         clearFooview();
         cmds.clear();
         stopCmdThread();
         mSubItemAdapter.getCheckedQueue().clear();
-        super.onDestroy();
     }
 }

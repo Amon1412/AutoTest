@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.Button;
@@ -135,7 +136,7 @@ public class MainActivity extends Activity {
     private void initSctiptFile() {
         try {
             assetsScripts = getAssets().list("script");
-            localSctipts = getAllDataFileName(getFilesDir().getPath());
+            localSctipts = getAllDataFileName(Environment.getExternalStorageDirectory()+"/Download");
         } catch (IOException e) {
             e.printStackTrace();
         }

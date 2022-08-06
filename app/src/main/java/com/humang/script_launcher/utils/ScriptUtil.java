@@ -76,6 +76,7 @@ public class ScriptUtil {
                 return;
             } else {
                 stopScript();
+                scriptThread = null;
             }
         }
         scriptThread = new Thread(new Runnable() {
