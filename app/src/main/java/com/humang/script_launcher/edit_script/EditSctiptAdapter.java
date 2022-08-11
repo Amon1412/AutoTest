@@ -1,4 +1,4 @@
-package com.humang.script_launcher;
+package com.humang.script_launcher.edit_script;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,6 +9,8 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.humang.script_launcher.R;
 
 import java.util.List;
 import java.util.PriorityQueue;

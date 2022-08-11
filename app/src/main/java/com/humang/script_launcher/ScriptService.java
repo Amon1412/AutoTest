@@ -14,7 +14,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -29,6 +28,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.humang.script_launcher.excute_script.MainActivity;
 import com.humang.script_launcher.utils.FileUtil;
 import com.humang.script_launcher.utils.ScriptUtil;
 

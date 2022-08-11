@@ -6,7 +6,7 @@
     android:layout_width="810dp"
     android:layout_height="1040dp"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".excute_script.MainActivity">
     <include
         android:id="@+id/header"
         layout="@layout/layout_header" />
@@ -52,20 +52,19 @@
                 android:layout_height="wrap_content"/>
         </RelativeLayout>
         <Button
-            android:layout_below="@+id/settings"
-            android:id="@+id/default_edit_bt"
+            android:id="@+id/set_default_params"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/horizontal_margin"
             android:text="设置默认参数"/>
 
         <Button
-            android:layout_below="@id/default_edit_bt"
+            android:layout_below="@id/set_default_params"
             android:id="@+id/edit_bt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/horizontal_margin"
-            android:text="编辑脚本"/>
+            android:text="录制脚本"/>
 
         <View
             android:layout_below="@id/edit_bt"
@@ -103,36 +102,4 @@
             android:text="@string/confirm"/>
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/edit_dialog"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="gone">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="默认休眠固定时间(秒)"/>
-        <EditText
-            android:id="@+id/default_sleep_text"
-            android:layout_width="wrap_content"
-            android:layout_height="60dp"
-            android:text="3"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="默认休眠随机时间(秒)"/>
-        <EditText
-            android:id="@+id/random_sleep_text"
-            android:layout_width="wrap_content"
-            android:layout_height="60dp"
-            android:text="3"/>
-        <Button
-            android:id="@+id/edit_ok"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="确定"/>
-    </LinearLayout>
 </RelativeLayout>

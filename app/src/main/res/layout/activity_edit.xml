@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="810dp"
     android:layout_height="1440dp"
-    tools:context=".EditActivity">
+    tools:context=".edit_script.EditActivity">
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"

@@ -1,4 +1,4 @@
-package com.humang.script_launcher;
+package com.humang.script_launcher.edit_script;
 
 import android.annotation.SuppressLint;
 import android.app.Service;
@@ -27,6 +27,11 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.humang.script_launcher.excute_script.MainActivity;
+import com.humang.script_launcher.MessageType;
+import com.humang.script_launcher.R;
+import com.humang.script_launcher.ScriptType;
+import com.humang.script_launcher.excute_script.SubItemAdapter;
 import com.humang.script_launcher.utils.ShellUtil;
 
 import java.io.File;
@@ -38,7 +43,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.Random;
 
 /**
  * @author : created by amon
@@ -208,9 +212,12 @@ public class EditService extends Service implements View.OnClickListener {
                             minTime = 2;
                             randomTime = 3;
                         }
-                        Random random = new Random();
-                        int time = minTime + random.nextInt(randomTime+1);
-                        addCmd(String.format("timeout /T %s /NOBREAK",time));
+                        if (randomTime <= 0) {
+                            addCmd(String.format("timeout /T %s /NOBREAK", minTime));
+                        } else {
+                            addCmd("set /a sleeptime=%random%%%"+randomTime+"+"+minTime);
+                            addCmd("timeout /T %sleeptime% /NOBREAK");
+                        }
                         removeDialog();
                     }
                 });
@@ -287,6 +294,12 @@ public class EditService extends Service implements View.OnClickListener {
                         }
                         int scriptType = cmdQueue.remove();
                         mHandler.sendMessage(mHandler.obtainMessage(MessageType.MASK_NOT_TOUCHABLE));
+                        // 休眠一会保证蒙层隐藏
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                         String cmd = "";
                         String result = "";
                         switch (scriptType) {
@@ -321,7 +334,7 @@ public class EditService extends Service implements View.OnClickListener {
                         Log.d("amon", "cmd: "+cmd);
                         Log.d("amon", "result: "+result);
                         mHandler.sendMessage(mHandler.obtainMessage(MessageType.MASK_TOUCHABLE));
-
+                        mHandler.sendMessage(mHandler.obtainMessage(MessageType.UPDATE_DETAIL));
                     }
                 }
 
@@ -409,9 +422,8 @@ public class EditService extends Service implements View.OnClickListener {
             @Override
             public void onClick(View v) {
                 Queue<Integer> checkedQueue = mSubItemAdapter.getCheckedQueue();
-                Iterator<Integer> iterator = checkedQueue.iterator();
-                while (iterator.hasNext()) {
-                    int next = iterator.next();
+                while (checkedQueue.size()>0) {
+                    int next = checkedQueue.remove();
                     cmds.remove(next);
                 }
                 checkedQueue.clear();
@@ -491,6 +503,7 @@ public class EditService extends Service implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.cancel_edit:
+                isEdit = false;
                 mHandler.sendMessage(mHandler.obtainMessage(MessageType.EXCUTE_CANCEAL));
                 break;
             case R.id.control:
@@ -626,10 +639,15 @@ public class EditService extends Service implements View.OnClickListener {
     private void addCmd(String cmd) {
         cmds.add(cmd);
         mHandler.sendMessage(mHandler.obtainMessage(MessageType.UPDATE_DETAIL));
-        if (!cmd.contains("timeout /T")) {
-            Random random = new Random();
-            int time = defaultSleepTime + random.nextInt(randomSleepTime+1);
-            addCmd(String.format("timeout /T %s /NOBREAK",time));
+        if (!(cmd.contains("timeout /T")
+                || cmd.contains("for")
+                || cmd.contains("set"))) {
+            if (randomSleepTime<=0) {
+                addCmd(String.format("timeout /T %s /NOBREAK", defaultSleepTime));
+            } else {
+                addCmd("set /a sleeptime=%random%%%"+randomSleepTime+"+"+defaultSleepTime);
+                addCmd("timeout /T %sleeptime% /NOBREAK");
+            }
         }
     }
 

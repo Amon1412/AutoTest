@@ -1,23 +1,18 @@
-package com.humang.script_launcher;
+package com.humang.script_launcher.excute_script;
 
 import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import com.humang.script_launcher.R;
+
 import java.util.List;
-import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
@@ -27,7 +22,7 @@ public class SubItemAdapter extends RecyclerView.Adapter<SubItemAdapter.RecyView
     private RecyclerView mRecycleView;
     private Context mContext;
     private List<String> cmds;
-    private Queue<Integer> checkedQueue = new PriorityQueue<>((v1,v2) -> (v2 -v1));
+    private Queue<Integer> checkedQueue = new PriorityQueue<>((o1, o2)->(o2-o1));
     private boolean isEdit;
 
     public SubItemAdapter(Context mContext, List<String> cmds) {

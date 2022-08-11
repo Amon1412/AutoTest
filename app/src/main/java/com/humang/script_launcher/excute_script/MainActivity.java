@@ -1,10 +1,8 @@
-package com.humang.script_launcher;
+package com.humang.script_launcher.excute_script;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -12,6 +10,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.widget.Button;
 import android.os.Build;
 import android.view.View;
@@ -20,8 +19,11 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Switch;
-import android.widget.TextView;
 import android.widget.Toast;
+
+import com.humang.script_launcher.R;
+import com.humang.script_launcher.ScriptService;
+import com.humang.script_launcher.edit_script.EditService;
 
 import java.io.File;
 import java.io.IOException;
@@ -131,6 +133,33 @@ public class MainActivity extends Activity {
                 finish();
             }
         });
+
+        findViewById(R.id.set_default_params).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final LayoutInflater inflater = MainActivity.this.getLayoutInflater();
+                View view = inflater.inflate(R.layout.dialog_default_params, null,false);
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                AlertDialog alertDialog = builder.setView(view)
+                        .setCancelable(false)
+                        .create();
+                view.findViewById(R.id.edit_ok).setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            defaultSleepTime = Integer.parseInt(((EditText)view.findViewById(R.id.default_sleep_text)).getText().toString());
+                            randomSleepTime = Integer.parseInt(((EditText)view.findViewById(R.id.random_sleep_text)).getText().toString());
+                        } catch (Exception e){
+
+                        }
+                        alertDialog.dismiss();
+                    }
+                });
+                alertDialog.show();
+
+            }
+        });
+
     }
 
     private void initSctiptFile() {
@@ -157,14 +186,14 @@ public class MainActivity extends Activity {
         return fileList.toArray(new String[fileList.size()]);
     }
 
-    //调用该方法，可创建一个悬浮窗显示于屏幕之上
+
     private void startScriptService() {
 
         boolean isShowLog = showLogSwitch.isChecked();
         boolean isShowPerformance = showPerformanceSwitch.isChecked();
         Log.d("humang_script", "startScriptService: "+isShowLog);
 
-        Intent intent = new Intent(this,ScriptService.class);
+        Intent intent = new Intent(this, ScriptService.class);
         intent.putExtra("scriptName",scriptName);
         intent.putExtra("isShowLog",isShowLog);
         intent.putExtra("isShowPerformance",isShowPerformance);
@@ -175,7 +204,7 @@ public class MainActivity extends Activity {
 
     //调用该方法，可创建一个悬浮窗显示于屏幕之上
     private void startEditeService() {
-        Intent intent = new Intent(this,EditService.class);
+        Intent intent = new Intent(this, EditService.class);
         intent.putExtra("defaultSleepTime",defaultSleepTime);
         intent.putExtra("randomSleepTime",randomSleepTime);
         startService(intent);

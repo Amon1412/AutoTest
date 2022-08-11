@@ -27,10 +27,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Script">
         <activity
-            android:name=".EditActivity"
+            android:name=".edit_script.EditActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".excute_script.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -44,7 +44,7 @@
             android:enabled="true"
             android:exported="true" />
         <service
-            android:name=".EditService"
+            android:name=".edit_script.EditService"
             android:enabled="true"
             android:exported="true" />
 

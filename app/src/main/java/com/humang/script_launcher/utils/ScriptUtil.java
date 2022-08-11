@@ -446,7 +446,6 @@ public class ScriptUtil {
         int loopTimes = 0;
         while (state == RUNING && loopTimes < loopTime){
             loopTimes += 1;
-            Log.d("humang_script", "looptime " + loopTime + "   looptimes" + loopTimes);
             excuteCmds(cmds);
         }
     }
