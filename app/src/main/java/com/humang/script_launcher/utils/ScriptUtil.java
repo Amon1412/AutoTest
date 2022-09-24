@@ -320,7 +320,6 @@ public class ScriptUtil {
     public String calculateVariable(String realValue) {
         ExpressionTrans expressionTrans = new ExpressionTrans();
         ArrayList<String> trans = expressionTrans.doTrans(realValue);
-        System.out.println(trans);
         ExpressionParse expressionParse = new ExpressionParse();
         double output = expressionParse.doParse(trans);
         if (!realValue.contains(".")) {
@@ -375,12 +374,13 @@ public class ScriptUtil {
         String[] component = cmd.split("/");
         Intent intent = new Intent();
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.setComponent(new ComponentName(component[0], component[0] + component[1]));
+        intent.setComponent(new ComponentName(component[0].trim(), component[0].trim() + component[1].trim()));
         try {
             context.startActivity(intent);
         } catch (ActivityNotFoundException e) {
             stopScript();
             Log.e("humang_script", "no such activity.  " + cmd);
+            Log.e("humang_script", "intent  " + intent.getComponent().getClassName()+"--"+intent.getComponent().getPackageName());
             Message message = handler.obtainMessage(MessageType.SHOW_LOG);
             Bundle bundle = new Bundle();
             bundle.putString("log","脚本已停止运行：未找到目标activity  " + cmd) ;
@@ -430,6 +430,7 @@ public class ScriptUtil {
      * 将bat命令中的echo转为java方式
      * */
     public void excuteEcho(String cmd) {
+        cmd = replaceVariable(cmd);
         String substring = cmd.trim().substring(5);
         Log.d("humang_script", "echo : " + substring);
         Message message = handler.obtainMessage(MessageType.SHOW_LOG);
@@ -446,6 +447,7 @@ public class ScriptUtil {
         int loopTimes = 0;
         while (state == RUNING && loopTimes < loopTime){
             loopTimes += 1;
+            vars.put("%%i",loopTimes+"");
             excuteCmds(cmds);
         }
     }
@@ -505,17 +507,20 @@ public class ScriptUtil {
     }
 
     public int getForTime(String cmd) {
-        int in = cmd.indexOf("in");
-        int aDo = cmd.indexOf("do");
+        int in = cmd.indexOf(" in ");
+        int aDo = cmd.indexOf(" do ");
         cmd = cmd.substring(in,aDo);
         int begin = cmd.lastIndexOf(",");
         int end = cmd.lastIndexOf(")");
+        Log.d("amon", "begin: "+begin+"  end:"+end);
         String substring= "";
         try {
             substring = cmd.substring(begin+1, end);
+            substring = replaceVariable(substring);
             return Integer.parseInt(substring);
         } catch (Exception e) {
-            Log.e("amon", "getForTime: "+substring);
+            Log.e("amon", "catch: "+substring);
+            e.printStackTrace();
             return -1;
         }
     }

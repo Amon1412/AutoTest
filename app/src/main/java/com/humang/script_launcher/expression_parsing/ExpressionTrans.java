@@ -23,7 +23,6 @@ public class ExpressionTrans {
         outputList = new ArrayList<>();
         for (int i = 0; i < input.toCharArray().length; i++) {
             String ch = String.valueOf(input.charAt(i));
-            System.out.println("For "+ch+" "+stack);
             switch (ch) {
                 case "+":
                 case "-":
@@ -50,7 +49,6 @@ public class ExpressionTrans {
                                 Integer.parseInt(String.valueOf(lastCh));
                             }
                             String lastNum = outputList.remove(outputList.size() - 1);
-                            System.out.println("lastNum = " + lastNum);
                             String num = lastNum+ch;
                             outputList.add(num);
                             break;
@@ -62,10 +60,8 @@ public class ExpressionTrans {
             }
         }
         while (!stack.isEmpty()){
-            System.out.println("While "+Arrays.asList(stack));
             outputList.add(stack.pop());
         }
-        System.out.println("End "+Arrays.asList(stack));
 
         return outputList;
     }

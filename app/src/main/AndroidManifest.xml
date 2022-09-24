@@ -30,7 +30,7 @@
             android:name=".edit_script.EditActivity"
             android:exported="false" />
         <activity
-            android:name=".excute_script.MainActivity"
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -40,7 +40,7 @@
         </activity>
 
         <service
-            android:name=".ScriptService"
+            android:name=".excute_script.ScriptService"
             android:enabled="true"
             android:exported="true" />
         <service
@@ -57,6 +57,20 @@
                 <action android:name="android.view.InputMethod" />
             </intent-filter>
             <meta-data android:name="android.view.im" android:resource="@xml/methods" />
+        </service>
+
+        <service
+            android:name=".accessibility_script.RobService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility"/>
+
         </service>
 
         <receiver

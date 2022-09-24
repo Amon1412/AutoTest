@@ -6,21 +6,23 @@
     android:layout_width="810dp"
     android:layout_height="1040dp"
     android:orientation="vertical"
-    tools:context=".excute_script.MainActivity">
+    tools:context=".MainActivity">
     <include
         android:id="@+id/header"
         layout="@layout/layout_header" />
 
     <LinearLayout
         android:id="@+id/settings"
-        android:layout_below="@id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/header"
         android:orientation="vertical">
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/horizontal_margin">
+            android:layout_marginHorizontal="@dimen/horizontal_margin"
+            android:visibility="gone">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -28,16 +30,19 @@
                 android:text="是否在屏幕中间显示log"
                 android:textColor="@color/black"
                 android:textSize="30dp" />
+
             <Switch
                 android:id="@+id/show_log"
-                android:layout_alignParentRight="true"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true" />
         </RelativeLayout>
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/horizontal_margin">
+            android:layout_marginHorizontal="@dimen/horizontal_margin"
+            android:visibility="gone">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -45,33 +50,42 @@
                 android:text="是否在屏幕左上角显示性能"
                 android:textColor="@color/black"
                 android:textSize="30dp" />
+
             <Switch
                 android:id="@+id/show_performance"
-                android:layout_alignParentRight="true"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true" />
         </RelativeLayout>
+
         <Button
             android:id="@+id/set_default_params"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/horizontal_margin"
-            android:text="设置默认参数"/>
+            android:text="设置默认参数" />
 
         <Button
-            android:layout_below="@id/set_default_params"
             android:id="@+id/edit_bt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/set_default_params"
             android:layout_marginHorizontal="@dimen/horizontal_margin"
-            android:text="录制脚本"/>
+            android:text="录制脚本" />
+        <Button
+            android:id="@+id/clear_log"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/edit_bt"
+            android:layout_marginHorizontal="@dimen/horizontal_margin"
+            android:text="清空日志" />
 
         <View
-            android:layout_below="@id/edit_bt"
-            android:background="@color/black"
-            android:layout_height="@dimen/split_line_height"
             android:layout_width="fill_parent"
-            android:layout_marginHorizontal="@dimen/horizontal_margin"/>
+            android:layout_height="@dimen/split_line_height"
+            android:layout_below="@id/edit_bt"
+            android:layout_marginHorizontal="@dimen/horizontal_margin"
+            android:background="@color/black" />
     </LinearLayout>
 
     <LinearLayout

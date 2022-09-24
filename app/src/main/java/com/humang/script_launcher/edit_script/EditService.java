@@ -27,7 +27,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.humang.script_launcher.excute_script.MainActivity;
+import com.humang.script_launcher.MainActivity;
 import com.humang.script_launcher.MessageType;
 import com.humang.script_launcher.R;
 import com.humang.script_launcher.ScriptType;

@@ -1,4 +1,4 @@
-package com.humang.script_launcher;
+package com.humang.script_launcher.excute_script;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -28,7 +28,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.humang.script_launcher.excute_script.MainActivity;
+import com.humang.script_launcher.MainActivity;
+import com.humang.script_launcher.MessageType;
+import com.humang.script_launcher.R;
 import com.humang.script_launcher.utils.FileUtil;
 import com.humang.script_launcher.utils.ScriptUtil;
 
@@ -48,8 +50,8 @@ public class ScriptService extends Service implements View.OnClickListener {
     public TextView mLogView;
     public TextView mPerformanceView;
 
-    private boolean isShowLog;
-    private boolean isShowPerformance;
+//    private boolean isShowLog;
+//    private boolean isShowPerformance;
     private boolean startImmediately;
 
     private int menuViewX = 0;
@@ -88,8 +90,8 @@ public class ScriptService extends Service implements View.OnClickListener {
                     intent.addCategory(Intent.CATEGORY_LAUNCHER);
                     intent.setAction(Intent.ACTION_MAIN);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-                    intent.putExtra("isShowLog",isShowLog);
-                    intent.putExtra("isShowPerformance",isShowPerformance);
+//                    intent.putExtra("isShowLog",isShowLog);
+//                    intent.putExtra("isShowPerformance",isShowPerformance);
                     mContext.startActivity(intent);
                     clearView();
                     onDestroy();
@@ -151,12 +153,12 @@ public class ScriptService extends Service implements View.OnClickListener {
         if (intent != null) {
             Bundle extras = intent.getExtras();
             String scriptName = extras.getString("scriptName");
-            boolean isShowLog = extras.getBoolean("isShowLog");
-            boolean isShowPerformance = extras.getBoolean("isShowPerformance");
+//            boolean isShowLog = extras.getBoolean("isShowLog");
+//            boolean isShowPerformance = extras.getBoolean("isShowPerformance");
             boolean startImmediately = extras.getBoolean("startImmediately");
             this.scriptName = scriptName;
-            this.isShowLog = isShowLog;
-            this.isShowPerformance = isShowPerformance;
+//            this.isShowLog = isShowLog;
+//            this.isShowPerformance = isShowPerformance;
             this.startImmediately = startImmediately;
         }
 
@@ -197,13 +199,14 @@ public class ScriptService extends Service implements View.OnClickListener {
     }
 
     public void showPerformance(String performance) {
-        if (isShowPerformance && mPerformanceView != null) {
-            mPerformanceView.setText(performance);
-        }
+//        if (isShowPerformance && mPerformanceView != null) {
+//            mPerformanceView.setText(performance);
+//        }
     }
 
     public void showLog(String log,boolean append) {
-        if (isShowLog && mLogView != null) {
+        if (mLogView != null) {
+//        if (isShowLog && mLogView != null) {
             if (append) {
                 log += mLogView.getText();
             }
@@ -214,12 +217,9 @@ public class ScriptService extends Service implements View.OnClickListener {
     public void initView() {
         addMaskView();
         addMenuView();
-        if (isShowLog) {
+//        if (isShowLog) {
             addLogView();
-        }
-        if (isShowPerformance) {
-            addPerformanceView();
-        }
+//        }
     }
     private void clearView() {
         clearMaskView();

@@ -1,4 +1,4 @@
-package com.humang.script_launcher.excute_script;
+package com.humang.script_launcher;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -21,9 +21,9 @@ import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.Toast;
 
-import com.humang.script_launcher.R;
-import com.humang.script_launcher.ScriptService;
 import com.humang.script_launcher.edit_script.EditService;
+import com.humang.script_launcher.excute_script.ScriptService;
+import com.humang.script_launcher.utils.ShellUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,6 +48,21 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        SharedPreferences sp = getSharedPreferences("humang_script", Context.MODE_PRIVATE);
+        String excutingScriptName = sp.getString("scriptName", "");
+        Boolean excutingStartImmediately = sp.getBoolean("startImmediately", false);
+        if (excutingStartImmediately ) {
+
+        }
+        if (excutingScriptName != "") {
+            scriptName = excutingScriptName;
+            startImmediately = true;
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putString("scriptName","");
+            editor.putBoolean("startImmediately",false);
+            editor.apply();
+            startScriptService();
+        }
         setContentView(R.layout.activity_main);
         boolean isShowLog = getIntent().getBooleanExtra("isShowLog",true);
         boolean isShowPerformance = getIntent().getBooleanExtra("isShowPerformance",true);
@@ -66,17 +81,7 @@ public class MainActivity extends Activity {
         initSctiptFile();
         initView();
 
-        SharedPreferences sp = getApplication().getSharedPreferences("humang_script", Context.MODE_PRIVATE);
-        String excutingScriptName = sp.getString("scriptName", "");
-        if (excutingScriptName != "") {
-            scriptName = excutingScriptName;
-            startImmediately = true;
-            SharedPreferences.Editor editor = sp.edit();
-            editor.putString("scriptName","");
-            editor.putBoolean("startImmediately",false);
-            editor.apply();
-            startScriptService();
-        }
+
     }
 
     private void initView() {
@@ -160,6 +165,13 @@ public class MainActivity extends Activity {
             }
         });
 
+        findViewById(R.id.clear_log).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ShellUtil.getInstance().execute("rm /sdcard/Download/Log.txt");
+            }
+        });
+
     }
 
     private void initSctiptFile() {
@@ -189,14 +201,14 @@ public class MainActivity extends Activity {
 
     private void startScriptService() {
 
-        boolean isShowLog = showLogSwitch.isChecked();
-        boolean isShowPerformance = showPerformanceSwitch.isChecked();
-        Log.d("humang_script", "startScriptService: "+isShowLog);
+//        boolean isShowLog = showLogSwitch.isChecked();
+//        boolean isShowPerformance = showPerformanceSwitch.isChecked();
+//        Log.d("humang_script", "startScriptService: "+isShowLog);
 
         Intent intent = new Intent(this, ScriptService.class);
         intent.putExtra("scriptName",scriptName);
-        intent.putExtra("isShowLog",isShowLog);
-        intent.putExtra("isShowPerformance",isShowPerformance);
+//        intent.putExtra("isShowLog",isShowLog);
+//        intent.putExtra("isShowPerformance",isShowPerformance);
         intent.putExtra("startImmediately",startImmediately);
         startService(intent);
         finish();

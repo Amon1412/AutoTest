@@ -8,7 +8,7 @@ import java.io.InputStream;
  * @author : created by amon
  * 时间 : 2022/7/5 15
  * 邮箱 ： yimeng.tang@humang.com
- * 主要功能 ：
+ * 主要功能 ：执行shell命令
  */
 public class ShellUtil {
     private static ShellUtil shellUtil;
@@ -19,6 +19,10 @@ public class ShellUtil {
             shellUtil = new ShellUtil();
         }
         return shellUtil;
+    }
+
+    public String execute(String cmd) {
+        return execute(cmd.split(" "));
     }
     public  String execute(String[] args) {
         //初始化指令

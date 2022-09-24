@@ -26,7 +26,6 @@ public class ExpressionParse {
             String s = inputList.get(i);
             try {
                 Double value = Double.valueOf(s);
-                System.out.println("value = " + value);
                 stack.push(value);
             } catch (Exception e) {
                 num2 = stack.pop();
