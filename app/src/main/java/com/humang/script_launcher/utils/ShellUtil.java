@@ -1,5 +1,9 @@
 package com.humang.script_launcher.utils;
 
+import android.app.Instrumentation;
+import android.os.SystemClock;
+import android.view.MotionEvent;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -73,5 +77,18 @@ public class ShellUtil {
             }
         }
         return result;
+    }
+    public void sendClickEvent(int x,int y) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Instrumentation inst = new Instrumentation();
+                inst.sendPointerSync(MotionEvent.obtain(SystemClock.uptimeMillis(),SystemClock.uptimeMillis(),
+                        MotionEvent.ACTION_DOWN, x, y, 0));
+                inst.sendPointerSync(MotionEvent.obtain(SystemClock.uptimeMillis(),SystemClock.uptimeMillis(),
+                        MotionEvent.ACTION_UP, x, y, 0));
+            }
+        }).start();
+
     }
 }

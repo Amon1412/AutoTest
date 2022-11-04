@@ -16,8 +16,6 @@ import java.util.List;
  * 主要功能 ：
  */
 public class FileUtil {
-    private static FileUtil fileUtil;
-    public FileUtil(){}
 
     public String readFile(Context context,String filename){
         BufferedReader reader = null;

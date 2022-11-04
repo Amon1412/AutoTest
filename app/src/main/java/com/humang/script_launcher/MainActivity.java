@@ -23,11 +23,16 @@ import android.widget.Toast;
 
 import com.humang.script_launcher.edit_script.EditService;
 import com.humang.script_launcher.excute_script.ScriptService;
+import com.humang.script_launcher.monky_script.MonkyService;
+import com.humang.script_launcher.monky_script.MonkyUtil;
+import com.humang.script_launcher.monky_script.MonkyBean;
 import com.humang.script_launcher.utils.ShellUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends Activity {
     String[] assetsScripts;
@@ -165,13 +170,19 @@ public class MainActivity extends Activity {
             }
         });
 
-        findViewById(R.id.clear_log).setOnClickListener(new OnClickListener() {
+        findViewById(R.id.clear_log_bt).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 ShellUtil.getInstance().execute("rm /sdcard/Download/Log.txt");
             }
         });
 
+        findViewById(R.id.monky_bt).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startMonkyService();
+            }
+        });
     }
 
     private void initSctiptFile() {
@@ -214,6 +225,12 @@ public class MainActivity extends Activity {
         finish();
     }
 
+    private void startMonkyService() {
+        Intent intent = new Intent(this, MonkyService.class);
+        startService(intent);
+        finish();
+    }
+
     //调用该方法，可创建一个悬浮窗显示于屏幕之上
     private void startEditeService() {
         Intent intent = new Intent(this, EditService.class);
@@ -222,6 +239,8 @@ public class MainActivity extends Activity {
         startService(intent);
         finish();
     }
+
+
 
     @Override
     protected void onDestroy() {

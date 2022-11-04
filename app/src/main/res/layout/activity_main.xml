@@ -73,12 +73,19 @@
             android:layout_marginHorizontal="@dimen/horizontal_margin"
             android:text="录制脚本" />
         <Button
-            android:id="@+id/clear_log"
+            android:id="@+id/clear_log_bt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/edit_bt"
             android:layout_marginHorizontal="@dimen/horizontal_margin"
             android:text="清空日志" />
+        <Button
+            android:id="@+id/monky_bt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/edit_bt"
+            android:layout_marginHorizontal="@dimen/horizontal_margin"
+            android:text="monky测试" />
 
         <View
             android:layout_width="fill_parent"
