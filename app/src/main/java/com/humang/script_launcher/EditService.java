@@ -358,6 +358,11 @@ public class EditService extends Service implements View.OnClickListener {
         if (remember) {
             addCmd("adb shell "+cmd);
         }
+        if (cmd.contains("input tap")) {
+            String[] cmds = cmd.split(" ");
+            ShellUtil.getInstance().sendClickEvent(Integer.parseInt(cmds[2]),Integer.parseInt(cmds[3]));
+            return "";
+        }
         return ShellUtil.getInstance().execute(cmd.split(" "));
     }
 

@@ -3,7 +3,17 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/work/humang_app/humang-script/app/src/main/res/layout/activity_edit.xml" value="0.11788194444444444" />
+        <entry key="..\:/work/humang_app/humang-script/app/src/main/res/layout/activity_main.xml" value="0.16" />
+        <entry key="..\:/work/humang_app/humang-script/app/src/main/res/layout/activity_test.xml" value="0.11788194444444444" />
+        <entry key="..\:/work/humang_app/humang-script/app/src/main/res/layout/dialog_default_params.xml" value="0.11788194444444444" />
+        <entry key="..\:/work/humang_app/humang-script/app/src/main/res/layout/fooview_detail.xml" value="0.11788194444444444" />
         <entry key="..\:/work/humang_app/humang-script/app/src/main/res/layout/fooview_dialog.xml" value="0.1" />
+        <entry key="..\:/work/humang_app/humang-script/app/src/main/res/layout/fooview_edit.xml" value="0.11788194444444444" />
+        <entry key="..\:/work/humang_app/humang-script/app/src/main/res/layout/fooview_menu.xml" value="0.11788194444444444" />
+        <entry key="..\:/work/humang_app/humang-script/app/src/main/res/layout/layout_header.xml" value="0.11788194444444444" />
+        <entry key="..\:/work/humang_app/humang-script/app/src/main/res/layout/script_item.xml" value="0.11788194444444444" />
+        <entry key="..\:/work/humang_app/humang-script/app/src/main/res/layout/view_ime.xml" value="0.11788194444444444" />
         <entry key="..\:/work/humang_app/humangscript/app/src/main/res/drawable/button_backgrount.xml" value="0.234" />
         <entry key="..\:/work/humang_app/humangscript/app/src/main/res/drawable/humang_background.xml" value="0.234" />
         <entry key="..\:/work/humang_app/humangscript/app/src/main/res/layout/activity_edit.xml" value="0.2" />
@@ -31,7 +41,7 @@
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="jbr-17" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

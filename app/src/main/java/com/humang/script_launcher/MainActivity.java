@@ -226,6 +226,7 @@ public class MainActivity extends Activity {
     }
 
     private void startMonkyService() {
+//        ShellUtil.getInstance().sendClickEvent(1050,2019);
         Intent intent = new Intent(this, MonkyService.class);
         startService(intent);
         finish();

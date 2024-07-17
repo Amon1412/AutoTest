@@ -469,6 +469,10 @@ public class ScriptUtil {
      * */
     public String excuteNomalCmd(String cmd) {
         String[] subCmds = cmd.trim().split(" ");
+        if (cmd.contains("input tap")) {
+            ShellUtil.getInstance().sendClickEvent(Integer.parseInt(subCmds[2]),Integer.parseInt(subCmds[3]));
+            return "";
+        }
         String result = ShellUtil.getInstance().execute(subCmds);
         Log.e("humang_script", "excuteAdbCmd: "+cmd+"  result: "+result);
         return result;
